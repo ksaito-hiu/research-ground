@@ -49,7 +49,7 @@ const router = express.Router();
         let params;
         if (req.session.id_tokenX != undefined) {
             params = {
-                post_logout_redirect_uri: 'https://s314.do-johodai.ac.jp/research-ground/',
+                post_logout_redirect_uri: config.auth.post_logout_redirect_uri,
                 id_token_hint: req.session.id_tokenX,
             };
         } else {

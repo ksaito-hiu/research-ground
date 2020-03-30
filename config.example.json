@@ -11,7 +11,8 @@
         "issuer": "https://accounts.google.com",
         "client_id": "12345678901-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com",
         "client_secret": "abcdefghijklmnopqrstuvwx",
-        "redirect_uris": [ "http://localhost:8080/research-ground/auth/callback" ]
+        "redirect_uris": [ "http://localhost:8080/research-ground/auth/callback" ],
+        "post_logout_redirect_uri": "http://localhost:8080/research-ground/"
     },
 
     "comment3": "課題提出機能に関する設定",
