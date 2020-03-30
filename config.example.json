@@ -1,0 +1,32 @@
+{
+    "comment": "research-ground Webアプリの設定ファイル。config.jsonをgitにcommitしたくないので，.gitignoreに入れて，かわりにこのファイルにconfig.jsonのサンプルを入れることにします。",
+
+    "comment1": "以下はサーバー全体の設定",
+    "server": {
+        "port": "8080"
+    },
+
+    "comment2": "認証に使用するOpenID ConnectのOPに関する設定",
+    "auth": {
+        "issuer": "https://accounts.google.com",
+        "client_id": "12345678901-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com",
+        "client_secret": "abcdefghijklmnopqrstuvwx",
+        "redirect_uris": [ "http://localhost:8080/research-ground/auth/callback" ]
+    },
+
+    "comment3": "課題提出機能に関する設定",
+    "files": {
+        "root": "./files/"
+    },
+
+    "comment4": "管理者(教師)のWebID",
+    "admin": [
+        "https://somebody1.solid.community/profile/card#me",
+        "https://somebody2.solid.community/profile/card#me"
+    ],
+
+    "comment5": "スチューデントアシスタントのWebID",
+    "SA": [
+        "https://accounts.google.com/people/somebody3#me"
+    ]
+}
