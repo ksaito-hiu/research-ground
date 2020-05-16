@@ -23,8 +23,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({storage: storage});
 
-const loginURL = '/auth/login';
-
 /*
  * ルーティング
  */
@@ -97,8 +95,9 @@ const loginURL = '/auth/login';
         if (!!req.session && !!req.session.webid)
             webid = req.session.webid;
         if (!webid) {
-            const query = '?return_path='+req.baseUrl+req.path;
-            res.redirect(loginURL+query);
+            const loginURL = config.server.mount_path+'/auth/login?return_path='+config.server.mount_path+req.originalUrl;
+console.log("GAHA: "+loginURL);
+            res.redirect(loginURL);
             return;
         }
         // WebIDからuidを切り出してセッションに保存
@@ -134,7 +133,7 @@ const loginURL = '/auth/login';
             current_path = '/';
         const files = await readdir(config.files.root + req.session.uid + current_path);
         files.unshift(parentDir);
-        const baseUrl = req.baseUrl;
+        const baseUrl = config.server.mount_path+'/files';
         let msg = 'uploaded files are .......';
         for (f of req.files) {
             msg += f.originalname + ",";
@@ -165,7 +164,7 @@ const loginURL = '/auth/login';
         }
         const files = await readdir(config.files.root + req.session.uid + current_path);
         files.unshift(parentDir);
-        const baseUrl = req.baseUrl;
+        const baseUrl = config.server.mount_path+'/files';
         const data = {
             msg,
             webid,
@@ -215,7 +214,7 @@ const loginURL = '/auth/login';
         }
         files = await readdir(config.files.root + req.session.uid + current_path);
         files.unshift(parentDir);
-        const baseUrl = req.baseUrl;
+        const baseUrl = config.server.mount_path+'/files';
         const data = {
             msg,
             webid,
@@ -237,7 +236,7 @@ const loginURL = '/auth/login';
             current_path = '/';
         const files = await readdir(config.files.root + req.session.uid + current_path);
         files.unshift(parentDir);
-        const baseUrl = req.baseUrl;
+        const baseUrl = config.server.mount_path+'/files';
         const data = {
             msg: 'files module!',
             webid,

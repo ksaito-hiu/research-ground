@@ -29,7 +29,7 @@ app.get('/', (req, res) => {
     } else {
         str = 'You are not logged in.';
     }
-    res.render('index.ejs',{msg:str});
+    res.render('index.ejs',{msg:str,baseUrl:config.server.mount_path});
 });
 
 const server = app.listen(config.server.port,()=>{console.log(`research-ground started. port=${config.server.port}.`)});

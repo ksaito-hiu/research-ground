@@ -51,7 +51,7 @@ const router = express.Router();
             req.session.webid = webid;
             let ret = req.session.return_path;
             if (!ret)
-                ret = req.baseUrl;
+                ret = config.server.mount_path;
             res.render('auth/loggedin.ejs',{webid,ret});
         } catch(err) {
             res.render('error.ejs',{msg: JSON.stringify(err)});
@@ -79,7 +79,7 @@ const router = express.Router();
         } else {
             msg = 'You are not logged in.';
         }
-        const baseUrl = req.baseUrl;
+        const baseUrl = config.server.mount_path;
         res.render('auth/auth.ejs',{msg,baseUrl});
     });
 })();

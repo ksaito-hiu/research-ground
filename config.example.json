@@ -3,7 +3,8 @@
 
     "comment1": "以下はサーバー全体の設定",
     "server": {
-        "port": "8080"
+        "port": "8080",
+        "mount_path": "/research-ground"
     },
 
     "comment2": "認証に使用するOpenID ConnectのOPに関する設定",
