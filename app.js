@@ -24,14 +24,10 @@ app.use('/files',files_app);
 
 app.get('/', (req, res) => {
     let str;
-    if (!!req.session) {
-        if (!!req.session.webid) {
-            str = `You are logged in as ${req.session.webid}.`;
-        } else {
-            str = 'You are not logged in.';
-        }
+    if (!!req.session && !!req.session.webid) {
+        str = `You are logged in as ${req.session.webid}.`;
     } else {
-        str = 'You are not logged in. (no session)';
+        str = 'You are not logged in.';
     }
     res.render('index.ejs',{msg:str});
 });
