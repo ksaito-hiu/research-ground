@@ -126,6 +126,7 @@ console.log("GAHA: "+loginURL);
     router.post('/upload',loginCheck,upload.array('files'),
         async (req,res)=>{
         const webid = req.session.webid;
+        const uid = req.session.uid;
         let current_path;
         if (!!req.query.path)
             current_path = path.normalize(req.query.path);
@@ -141,6 +142,7 @@ console.log("GAHA: "+loginURL);
         const data = {
             msg,
             webid,
+            uid,
             path: current_path,
             files,
             baseUrl
@@ -168,6 +170,7 @@ console.log("GAHA: "+loginURL);
         const data = {
             msg,
             webid,
+            uid,
             path: current_path,
             files,
             baseUrl
@@ -218,6 +221,7 @@ console.log("GAHA: "+loginURL);
         const data = {
             msg,
             webid,
+            uid,
             path: current_path,
             files,
             baseUrl
@@ -229,6 +233,7 @@ console.log("GAHA: "+loginURL);
                staticRouter);
     router.get('/',loginCheck, async (req,res)=>{
         const webid = req.session.webid;
+        const uid = req.session.uid;
         let current_path;
         if (!!req.query.path)
             current_path = path.normalize(req.query.path);
@@ -240,6 +245,7 @@ console.log("GAHA: "+loginURL);
         const data = {
             msg: 'files module!',
             webid,
+            uid,
             path: current_path,
             files,
             baseUrl
