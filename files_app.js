@@ -96,7 +96,6 @@ const upload = multer({storage: storage});
             webid = req.session.webid;
         if (!webid) {
             const loginURL = config.server.mount_path+'/auth/login?return_path='+config.server.mount_path+req.originalUrl;
-console.log("GAHA: "+loginURL);
             res.redirect(loginURL);
             return;
         }
@@ -116,9 +115,18 @@ console.log("GAHA: "+loginURL);
     // pathで'/:uid'のようにしてs学籍番号が
     // req.params.uidに入ることを前提にしてる
     function permissionCheck(req,res,next) {
+        if (config.admin.includes(req.session.webid)) { // 管理者はOK
+            next();
+            return;
+        }
+        if (config.SA.includes(req.session.webid)) { // SAもOK
+            next();
+            return;
+        }
         if (req.session.uid !== req.params.uid) {
             const msg = 'You do not have permission.';
-            res.status(403).render('error.ejs',{msg});
+            const baseUrl = config.server.mount_path;
+            res.status(403).render('error.ejs',{msg,baseUrl});
             return;
         }
         next();
