@@ -54,7 +54,9 @@ const router = express.Router();
                 ret = config.server.mount_path;
             res.render('auth/loggedin.ejs',{webid,ret});
         } catch(err) {
-            res.render('error.ejs',{msg: JSON.stringify(err)});
+            const msg = JSON.stringify(err);
+            const baseUrl = config.server.mount_path;
+            res.render('error.ejs',{msg, baseUrl});
         }
     });
 
