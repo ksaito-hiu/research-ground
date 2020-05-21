@@ -6,6 +6,13 @@ const multer = require('multer');
 
 const router = express.Router();
 
+// MongoDBのクライアントを受け取ってDBを初期化
+// DB名は'rg_files'の決め打ち
+router.set_mongo_client = function(mc) {
+    router.mongo_client = mc;
+    router.DB = mc.db('rg_files');
+};
+
 const storage = multer.diskStorage({
     destination: function(req,file,cb) {
         const webid = req.session.webid;
