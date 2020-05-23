@@ -12,3 +12,14 @@ research ground.
 
     node app.js
 
+----------------------------------------
+
+MongoDB
+
+Not well considered yet. But for the moment...
+
+* DB name: research_ground
+    + Collection name: actions
+        - { type: 'action_type', utime: number_of_unixtime, and more }
+    + Collection name: files
+        - { path: 'path to the file', isDir: false }

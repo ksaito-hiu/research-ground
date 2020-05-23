@@ -6,11 +6,17 @@ const multer = require('multer');
 
 const router = express.Router();
 
+let db = null;
+let colActions = null;
+let colFiles = null;
+
 // MongoDBのクライアントを受け取ってDBを初期化
-// DB名は'rg_files'の決め打ち
-router.set_mongo_client = function(mc) {
+// DB名は'research_ground'の決め打ち
+router.set_mongo_client = async function(mc) {
   router.mongo_client = mc;
-  router.DB = mc.db('rg_files');
+  db = mc.db('research_ground');
+  colActions = await db.collection('actions');
+  colFiles = await db.collection('files');
 };
 
 const storage = multer.diskStorage({
@@ -138,32 +144,41 @@ const upload = multer({storage: storage});
     }
     next();
   }
-  router.post('/upload',loginCheck,upload.array('files'),
-              async (req,res)=>{
-                const webid = req.session.webid;
-                const uid = req.session.uid;
-                let current_path;
-                if (!!req.query.path)
-                  current_path = path.normalize(req.query.path);
-                else
-                  current_path = '/';
-                const files = await readdir(config.files.root + req.session.uid + current_path);
-                files.unshift(parentDir);
-                const baseUrl = config.server.mount_path+'/files';
-                let msg = 'uploaded files are .......';
-                for (f of req.files) {
-                  msg += f.originalname + ",";
-                }
-                const data = {
-                  msg,
-                  webid,
-                  uid,
-                  path: current_path,
-                  files,
-                  baseUrl
-                };
-                res.render('files/files.ejs',data);
-              });
+
+  router.post('/upload',loginCheck,upload.array('files'),async (req,res)=>{
+    const webid = req.session.webid;
+    const uid = req.session.uid;
+    let current_path;
+    if (!!req.query.path)
+      current_path = path.normalize(req.query.path);
+    else
+      current_path = '/';
+    const files = await readdir(config.files.root + req.session.uid + current_path);
+    files.unshift(parentDir);
+    const baseUrl = config.server.mount_path+'/files';
+    let msg = 'uploaded files are .......';
+    const actions = [];
+    const newFiles = [];
+    const utime = new Date().getTime();
+    for (f of req.files) {
+      msg += f.originalname + ",";
+      const file_path = uid+current_path+f.originalname;
+      actions.push({type:'upload',utime,"path":file_path});
+      newFiles.push({"path":file_path,isDir:false});
+    }
+    await colActions.insertMany(actions);
+    await colFiles.insertMany(newFiles);
+    const data = {
+      msg,
+      webid,
+      uid,
+      path: current_path,
+      files,
+      baseUrl
+    };
+    res.render('files/files.ejs',data);
+  });
+
   router.get('/mkdir',loginCheck, async (req,res)=>{
     const webid = req.session.webid;
     const uid = req.session.uid;
@@ -176,6 +191,10 @@ const upload = multer({storage: storage});
     try {
       const dir = req.query.dir;
       msg += await makeDir(config.files.root+uid+current_path+dir);
+      const utime = new Date().getTime();
+      const dirPath = uid+current_path+dir;
+      await colActions.insertOne({type:'mkdir',utime,"path":dirPath});
+      await colFiles.insertOne({path:dirPath,isDir:true});
     } catch (err) {
       msg += err;
     }
@@ -192,6 +211,7 @@ const upload = multer({storage: storage});
     };
     res.render('files/files.ejs',data);
   });
+
   router.get('/remove',loginCheck, async (req,res)=>{
     const webid = req.session.webid;
     const uid = req.session.uid;
@@ -208,17 +228,32 @@ const upload = multer({storage: storage});
     else
       rments = [req.query.rment];
     let ps = [];
+    const utime = new Date().getTime();
+    const actions = [];
+    const rmEntries = [];
     for (rment of rments) {
       for (f of files) {
         if (rment === f.name) {
-          if (f.isDirectory())
-            ps.push(removeDir(config.files.root+uid+current_path+rment));
-          else
-            ps.push(removeFile(config.files.root+uid+current_path+rment));
+          if (f.isDirectory()) {
+            const dir = config.files.root+uid+current_path+rment;
+            ps.push(removeDir(dir));
+            const dirPath = uid+current_path+rment;
+            actions.push({type:'rmdir',utime,"path":dirPath});
+            rmEntries.push({"path":dirPath});
+          } else {
+            const rmFile = config.files.root+uid+current_path+rment;
+            ps.push(removeFile(rmFile));
+            const rmFilePath = uid+current_path+rment;
+            actions.push({type:'rm',utime,"path":rmFilePath});
+            rmEntries.push({"path":rmFilePath});
+          }
           break;
         }
       }
     }
+    await colActions.insertMany(actions);
+    for (let e of rmEntries)
+        await colFiles.deleteMany(e);
     let msg;
     try {
       ps = await Promise.all(ps);
@@ -243,6 +278,7 @@ const upload = multer({storage: storage});
     };
     res.render('files/files.ejs',data);
   });
+
   router.get('/:uid/*',loginCheck,
              permissionCheck,
              staticRouter);
