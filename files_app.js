@@ -8,7 +8,6 @@ const router = express.Router();
 
 let db = null;
 let colActions = null;
-let colFiles = null;
 
 // MongoDBのクライアントを受け取ってDBを初期化
 // DB名は'research_ground'の決め打ち
@@ -16,7 +15,6 @@ router.set_mongo_client = async function(mc) {
   router.mongo_client = mc;
   db = mc.db('research_ground');
   colActions = await db.collection('actions');
-  colFiles = await db.collection('files');
 };
 
 const storage = multer.diskStorage({
@@ -40,11 +38,46 @@ const upload = multer({storage: storage});
  * ルーティング
  */
 (async function() {
+  // express.staticの前に置くことでディレクトリの
+  // indexを表示できるようにするミドルウェア
+  // ただし、下の方にあるloginCheckとpermissionCheckの
+  // 後に置かれておりreq.session.uidとかが使える前提で
+  // 書かれている
+  const dirIndex = async function(req,res,next) {
+    const the_path = config.files.root + req.path;
+    const stats = await stat(the_path);
+    if (stats.isDirectory()) {
+      if (the_path.endsWith('/')) {
+        const files = await readdir(the_path);
+        files.unshift(parentDir);
+        res.render('files/dir_index',{files});
+        return;
+      } else {
+        const basename = path.basename(the_path);
+        res.redirect('./'+basename+'/');
+        return;
+      }
+    }
+    next();
+  };
   const staticRouter = express.static(config.files.root);
   const parentDir = {
     name: '..',
     isDirectory: function() { return true; }
   };
+
+  // パスを調べて非同期でStatsを返す。
+  async function stat(path) {
+    return new Promise((resolve,reject)=>{
+      fs.stat(path,(err,stats)=>{
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(stats);
+      });
+    });
+  }
 
   // フォルダの中一覧を非同期でゲット
   async function readdir(dir) {
@@ -167,7 +200,6 @@ const upload = multer({storage: storage});
       newFiles.push({"path":file_path,isDir:false});
     }
     await colActions.insertMany(actions);
-    await colFiles.insertMany(newFiles);
     const data = {
       msg,
       webid,
@@ -194,7 +226,6 @@ const upload = multer({storage: storage});
       const utime = new Date().getTime();
       const dirPath = uid+current_path+dir;
       await colActions.insertOne({type:'mkdir',utime,"path":dirPath});
-      await colFiles.insertOne({path:dirPath,isDir:true});
     } catch (err) {
       msg += err;
     }
@@ -230,7 +261,6 @@ const upload = multer({storage: storage});
     let ps = [];
     const utime = new Date().getTime();
     const actions = [];
-    const rmEntries = [];
     for (rment of rments) {
       for (f of files) {
         if (rment === f.name) {
@@ -239,21 +269,17 @@ const upload = multer({storage: storage});
             ps.push(removeDir(dir));
             const dirPath = uid+current_path+rment;
             actions.push({type:'rmdir',utime,"path":dirPath});
-            rmEntries.push({"path":dirPath});
           } else {
             const rmFile = config.files.root+uid+current_path+rment;
             ps.push(removeFile(rmFile));
             const rmFilePath = uid+current_path+rment;
             actions.push({type:'rm',utime,"path":rmFilePath});
-            rmEntries.push({"path":rmFilePath});
           }
           break;
         }
       }
     }
     await colActions.insertMany(actions);
-    for (let e of rmEntries)
-        await colFiles.deleteMany(e);
     let msg;
     try {
       ps = await Promise.all(ps);
@@ -281,6 +307,7 @@ const upload = multer({storage: storage});
 
   router.get('/:uid/*',loginCheck,
              permissionCheck,
+             dirIndex,
              staticRouter);
   router.get('/',loginCheck, async (req,res)=>{
     const webid = req.session.webid;
