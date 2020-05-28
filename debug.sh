@@ -38,5 +38,5 @@ cd $INSTALL_DIR
 
 #export MONGODB_URI='mongodb://127.0.0.1:27017'
 
-node app.js
+node --unhandled-rejections=strict app.js
 

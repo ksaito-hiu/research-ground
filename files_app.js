@@ -1,43 +1,44 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const config = require('./config.json');
 const multer = require('multer');
 
 const router = express.Router();
 
-let db = null;
-let colActions = null;
-
-// MongoDBのクライアントを受け取ってDBを初期化
-// DB名は'research_ground'の決め打ち
-router.set_mongo_client = async function(mc) {
-  router.mongo_client = mc;
-  db = mc.db('research_ground');
-  colActions = await db.collection('actions');
-};
-
-const storage = multer.diskStorage({
-  destination: function(req,file,cb) {
-    const webid = req.session.webid;
-    let n = webid.lastIndexOf("/");
-    let uid = webid.substring(n+1);
-    n = uid.lastIndexOf("#");
-    uid = uid.substring(0,n);
-    const root_path = config.files.root + uid + req.query.path;
-    cb(null,root_path);
-  },
-  filename: function (req,file,cb) {
-    const name = file.originalname;
-    cb(null,name);
-  }
-});
-const upload = multer({storage: storage});
-
 /*
  * ルーティング
  */
-(async function() {
+const init = async function(config) {
+  let colActions = null;
+
+  // MongoDBのクライアントを受け取ってDBを取得し
+  // actionを記録するためのcollectionを取得。
+  // DB名は'research_ground'の決め打ち
+  router.set_mongo_client = async function(mc) {
+    const db = mc.db('research_ground');
+    colActions = await db.collection('actions');
+  };
+
+  const storage = multer.diskStorage({
+    destination: function(req,file,cb) {
+      const webid = req.session.webid;
+      const uid = config.identity.webid2id(webid);
+      const dirs = config.identity.classifier(uid);
+      let current_path;
+      if (!!req.query.path)
+        current_path = path.normalize(req.query.path);
+      else
+        current_path = '/';
+      const the_path = config.files.root + dirs + uid + current_path;
+      cb(null,the_path);
+    },
+    filename: function (req,file,cb) {
+      const name = file.originalname;
+      cb(null,name);
+    }
+  });
+  const upload = multer({storage: storage});
+
   // express.staticの前に置くことでディレクトリの
   // indexを表示できるようにするミドルウェア
   // ただし、下の方にあるloginCheckとpermissionCheckの
@@ -71,7 +72,7 @@ const upload = multer({storage: storage});
     return new Promise((resolve,reject)=>{
       fs.stat(path,(err,stats)=>{
         if (err) {
-          reject(err);
+          resolve(null);
           return;
         }
         resolve(stats);
@@ -122,10 +123,23 @@ const upload = multer({storage: storage});
     });
   }
 
-  // 非同期フォルダ作成
+  // 非同期フォルダ作成(非再帰的)
   async function makeDir(dir_path) {
     return new Promise((resolve,reject)=>{
       fs.mkdir(dir_path,(err) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(dir_path);
+      });
+    });
+  }
+
+  // 非同期フォルダ作成(再帰的)
+  async function makeDirR(dir_path) {
+    return new Promise((resolve,reject)=>{
+      fs.mkdir(dir_path,{recursive:true},(err) => {
         if (err) {
           reject(err);
           return;
@@ -146,20 +160,15 @@ const upload = multer({storage: storage});
       return;
     }
     // WebIDからuidを切り出してセッションに保存
-    // 以下情報大のWebIDの付け方に依存
-    let n = webid.lastIndexOf("/");
-    let uid = webid.substring(n+1);
-    n = uid.lastIndexOf("#");
-    uid = uid.substring(0,n);
+    const uid = config.identity.webid2id(webid);
     req.session.uid = uid;
     next();
   }
 
   // アクセス件チェック
   // 上のloginCheckの後で呼ばれることを前提にしてる
-  // のでreq.session.uidにuidが入っていて、
-  // pathで'/:uid'のようにしてs学籍番号が
-  // req.params.uidに入ることを前提にしてる
+  // のでreq.session.webidにwebidが入っていて、
+  // req.session.uidにuidが入っている前提で処理している。
   function permissionCheck(req,res,next) {
     if (config.admin.includes(req.session.webid)) { // 管理者はOK
       next();
@@ -169,7 +178,11 @@ const upload = multer({storage: storage});
       next();
       return;
     }
-    if (req.session.uid !== req.params.uid) {
+    const uid = req.session.uid;
+    const the_dir = '/'+config.identity.classifier(uid)+uid;
+//console.log("GAHA: req.path="+req.path);
+//console.log("GAHA: the_dir ="+the_dir);
+    if (!req.path.startsWith(the_dir)) {
       const msg = 'You do not have permission.';
       const baseUrl = config.server.mount_path;
       res.status(403).render('error.ejs',{msg,baseUrl});
@@ -186,26 +199,26 @@ const upload = multer({storage: storage});
       current_path = path.normalize(req.query.path);
     else
       current_path = '/';
-    const files = await readdir(config.files.root + req.session.uid + current_path);
+    const the_path = config.files.root+config.identity.classifier(uid)+uid+current_path;
+    const files = await readdir(the_path);
     files.unshift(parentDir);
     const baseUrl = config.server.mount_path+'/files';
     let msg = 'uploaded files are .......';
     const actions = [];
-    const newFiles = [];
     const utime = new Date().getTime();
     for (f of req.files) {
       msg += f.originalname + ",";
       const file_path = uid+current_path+f.originalname;
       actions.push({type:'upload',utime,"path":file_path});
-      newFiles.push({"path":file_path,isDir:false});
     }
     await colActions.insertMany(actions);
+    const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
-      uid,
       path: current_path,
       files,
+      user_dir,
       baseUrl
     };
     res.render('files/files.ejs',data);
@@ -222,22 +235,24 @@ const upload = multer({storage: storage});
     let msg = 'mkdir: ';
     try {
       const dir = req.query.dir;
-      msg += await makeDir(config.files.root+uid+current_path+dir);
+      const the_path = config.files.root+config.identity.classifier(uid)+uid+current_path+dir;
+      msg += await makeDir(the_path);
       const utime = new Date().getTime();
       const dirPath = uid+current_path+dir;
       await colActions.insertOne({type:'mkdir',utime,"path":dirPath});
     } catch (err) {
       msg += err;
     }
-    const files = await readdir(config.files.root + req.session.uid + current_path);
+    const files = await readdir(config.files.root+config.identity.classifier(uid)+uid+current_path);
     files.unshift(parentDir);
     const baseUrl = config.server.mount_path+'/files';
+    const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
-      uid,
       path: current_path,
       files,
+      user_dir,
       baseUrl
     };
     res.render('files/files.ejs',data);
@@ -251,7 +266,7 @@ const upload = multer({storage: storage});
       current_path = path.normalize(req.query.path);
     else
       current_path = '/';
-    let files = await readdir(config.files.root + req.session.uid + current_path);
+    let files = await readdir(config.files.root+config.identity.classifier(uid)+uid+current_path);
     files.unshift(parentDir);
     let rments;
     if (Array.isArray(req.query.rment))
@@ -265,12 +280,12 @@ const upload = multer({storage: storage});
       for (f of files) {
         if (rment === f.name) {
           if (f.isDirectory()) {
-            const dir = config.files.root+uid+current_path+rment;
+            const dir = config.files.root+config.identity.classifier(uid)+uid+current_path+rment;
             ps.push(removeDir(dir));
             const dirPath = uid+current_path+rment;
             actions.push({type:'rmdir',utime,"path":dirPath});
           } else {
-            const rmFile = config.files.root+uid+current_path+rment;
+            const rmFile = config.files.root+config.identity.classifier(uid)+uid+current_path+rment;
             ps.push(removeFile(rmFile));
             const rmFilePath = uid+current_path+rment;
             actions.push({type:'rm',utime,"path":rmFilePath});
@@ -291,24 +306,21 @@ const upload = multer({storage: storage});
       console.log(e);
       msg = 'some error was occured. '+e.toString();
     }
-    files = await readdir(config.files.root + req.session.uid + current_path);
+    files = await readdir(config.files.root+config.identity.classifier(uid)+uid+current_path);
     files.unshift(parentDir);
     const baseUrl = config.server.mount_path+'/files';
+    const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
-      uid,
       path: current_path,
       files,
+      user_dir,
       baseUrl
     };
     res.render('files/files.ejs',data);
   });
 
-  router.get('/:uid/*',loginCheck,
-             permissionCheck,
-             dirIndex,
-             staticRouter);
   router.get('/',loginCheck, async (req,res)=>{
     const webid = req.session.webid;
     const uid = req.session.uid;
@@ -317,19 +329,44 @@ const upload = multer({storage: storage});
       current_path = path.normalize(req.query.path);
     else
       current_path = '/';
-    const files = await readdir(config.files.root + req.session.uid + current_path);
+    const the_path = config.files.root + config.identity.classifier(uid) + uid + current_path
+    const files = await readdir(the_path);
     files.unshift(parentDir);
     const baseUrl = config.server.mount_path+'/files';
+    const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;
     const data = {
       msg: 'files module!',
       webid,
-      uid,
       path: current_path,
       files,
+      user_dir,
       baseUrl
     };
     res.render('files/files.ejs',data);
   });
-})();
 
-module.exports = router;
+  router.get('/*',loginCheck,
+             permissionCheck,
+             dirIndex,
+             staticRouter);
+
+  // auth.jsの中から呼び出されて、uidのファイル提出場所
+  // のデイレクトリが存在するかどうかチェックし、無かったら
+  // 作成する。
+  router.checkDir = async function(uid) {
+    const the_path = config.files.root + config.identity.classifier(uid) + uid;
+    const stats = await stat(the_path);
+    if (stats===null) {
+      await makeDirR(the_path);
+      return 'OK';
+    }
+    if (stats.isDirectory())
+      return 'The dir is already exests.';
+    else
+      return `There is a file named ${uid} already.'`
+  }
+
+  return router;
+};
+
+module.exports = init;

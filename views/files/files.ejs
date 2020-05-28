@@ -6,6 +6,7 @@
   </head>
   <body>
     <h1>files</h1>
+    <p style="color:red;font-size:150%;">だいぶ改造したので不具合あったら教えて下さい。</p>
     <p>Message: <%=msg %></p>
     <p>WebID: <%=webid %></p>
     <p>Current Directory: <%=path %></p>
@@ -19,7 +20,7 @@
           <% } else { %>
             <li><input type="checkbox" name="rment" value="<%=file.name %>" />
                 :<%=file.name %>
-                :<a href="<%=baseUrl%>/<%=uid%><%=path%><%=file.name%>">link</a></li>
+                :<a href="<%=user_dir%><%=path%><%=file.name%>">link</a></li>
           <% } %>
         <% }); %>
       </ul>

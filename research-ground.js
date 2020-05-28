@@ -7,14 +7,15 @@
  * 単体でアプリですが、他のアプリにマウントさせて使うこともできます。
  */
 
-
 const express = require('express');
 const session = require('express-session');
 const { MongoClient } = require('mongodb');
-const auth = require('./auth');
-const files_app = require('./files_app');
 
 const init = async function(config) {
+  const files_app = await require('./files_app')(config);
+  const auth = await require('./auth')(config);
+  auth.set_files_app(files_app);
+
   // MongoDBのクライアントを初期化
   const mongo_client = new MongoClient('mongodb://127.0.0.1:27017',{
     useNewUrlParser: true,
@@ -24,6 +25,7 @@ const init = async function(config) {
 
   // 上で初期化したMongoDBのクライアントを使い回す
   await files_app.set_mongo_client(mongo_client);
+  await auth.set_mongo_client(mongo_client);
 
   const app = express();
 

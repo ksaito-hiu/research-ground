@@ -1,10 +1,26 @@
 const express = require('express');
 const { Issuer, generators } = require('openid-client');
-const config = require('./config.json');
 
 const router = express.Router();
 
-(async function() {
+const init = async function(config) {
+  let colActions = null;
+  let files_app = null;
+
+  // MongoDBのクライアントを受け取ってDBを取得し
+  // actionを記録するためのcollectionを取得。
+  // DB名は'research_ground'の決め打ち
+  router.set_mongo_client = async function(mc) {
+    const db = mc.db('research_ground');
+    colActions = await db.collection('actions');
+  };
+
+  // files_appを受け取って保存する。
+  // 提出場所のチェックをするため。
+  router.set_files_app = async function(fa) {
+    files_app = fa;
+  };
+
   let tryCount = 0;
   let client = null;
   const initClient = async function() {
@@ -17,7 +33,7 @@ const router = express.Router();
         response_types: ['code'],
       });
     } catch(err) {
-      console.log('Cannot search openid-op at id.do-johodai.ac.jp. (tryCount='+tryCount+')');
+      console.log(`Cannot search openid-op at ${config.auth.issuer}. (tryCount=${tryCount})`);
       tryCount++;
       let t = 1000*tryCount*tryCount;
       t = t>10*60*1000?10*60*1000:t;
@@ -48,7 +64,22 @@ const router = express.Router();
       const tokenSet = await client.callback(config.auth.redirect_uris[0], params, { code_verifier });
       req.session.id_tokenX = tokenSet.id_token;
       const webid = tokenSet.claims().sub;
+      const uid = config.identity.webid2id(webid);
+      if (!uid) {
+        const msg = 'You do not have permission to login this server.';
+        const baseUrl = config.server.mount_path;
+        res.render('error.ejs',{msg, baseUrl});
+        return;
+      }
       req.session.webid = webid;
+      req.session.uid = uid;
+      const utime = new Date().getTime();
+      await colActions.insertOne({type:'login',utime,"uid":uid});
+
+      // ログインが成功したらファイルの提出場所が存在するかチェックして
+      // 無ければ作成する。
+      await files_app.checkDir(uid);
+      
       let ret = req.session.return_path;
       if (!ret) {
         ret = config.server.mount_path;
@@ -74,6 +105,7 @@ const router = express.Router();
       params = {};
     }
     req.session.webid = null;
+    req.session.uid = null;
     const theUrl = client.endSessionUrl(params);
     res.redirect(theUrl);
   });
@@ -87,6 +119,8 @@ const router = express.Router();
     const baseUrl = config.server.mount_path;
     res.render('auth/auth.ejs',{msg,baseUrl});
   });
-})();
 
-module.exports = router;
+  return router;
+};
+
+module.exports = init;
