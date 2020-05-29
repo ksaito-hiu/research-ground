@@ -24,16 +24,16 @@
           <% } %>
         <% }); %>
       </ul>
-      <button type="submit">delete checked</button>
+      <button type="submit"><%= __('delete_checked') %></button>
     </form>
     <form action="<%=baseUrl%>/upload?path=<%=path %>" method="post" enctype="multipart/form-data">
       <input type="file" name="files" multiple="multiple" />
-      <button type="submit">upload</button>
+      <button type="submit"><%= __('upload_files') %></button>
     </form>
     <form action="<%=baseUrl%>/mkdir" method="get">
       <input type="hidden" name="path" value="<%=path %>" />
       <input type="text" name="dir" />
-      <button type="submit">mkdir</button>
+      <button type="submit"><%= __('mkdir') %></button>
     </form>
     <p><a href="<%=baseUrl%>/../">Back to research-ground top.</a></p>
   </body>

@@ -7,9 +7,11 @@
  * 単体でアプリですが、他のアプリにマウントさせて使うこともできます。
  */
 
+const path = require('path');
 const express = require('express');
 const session = require('express-session');
 const { MongoClient } = require('mongodb');
+const i18n = require('i18n');
 
 const init = async function(config) {
   // idをWebIDに変換する関数が設定されてなければ以下の
@@ -62,7 +64,13 @@ const init = async function(config) {
   const app = express();
 
   app.set('view engine','ejs');
-  app.set('views',config.server.views);
+  app.set('views',path.join(__dirname,'views'));
+
+  i18n.configure({
+    locales: ['en', 'ja'],
+    directory: path.join(__dirname,'locales')
+  });
+  app.use(i18n.init);
 
   app.use(session({
     secret: config.server.session.secret,

@@ -5,7 +5,6 @@
   "server": {
     "port": "8080",
     "mount_path": "/research-ground",
-    "views": "./views",
     "session": {
       "secret": "some secret string",
       "maxAge": 10800000
@@ -30,7 +29,7 @@
 
   "comment3": "課題提出機能に関する設定",
   "files": {
-    "root": "./files/",
+    "root": "/path/to/the/directory/files/",
     "hook": null
   },
 
