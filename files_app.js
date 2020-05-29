@@ -210,6 +210,8 @@ const init = async function(config) {
       msg += f.originalname + ",";
       const file_path = uid+current_path+f.originalname;
       actions.push({type:'upload',utime,"path":file_path});
+      if (!!config.files.hook)
+        config.files.hook(current_path+f.originalname,uid,utime);
     }
     await colActions.insertMany(actions);
     const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;

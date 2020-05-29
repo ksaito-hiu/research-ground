@@ -4,7 +4,7 @@ const express = require('express');
   const config = require('./config.json');
   // idをwebidに変換する関数を設定する
   config.identity.id2webid = function(id) {
-    return 'https://'+config.server.hostname+'/people/'+id+'#me';
+    return 'https://id.do-johodai.ac.jp/people/'+id+'#me';
   };
   // webidをidに変換する関数を設定する
   // もし、この関数がnullを返してきたならばログインを拒否する
@@ -23,6 +23,12 @@ const express = require('express');
     } else {
       return 'unknown/';
     }
+  };
+  // ファイル提出を検知して処理するための関数
+  // (今はまだなにもさせない)
+  config.files.hook = function(path,uid,utime) {
+    //console.log("GAHA: ファイルが提出されました。");
+    //console.log("path="+path+", uid="+uid+", utime="+utime);
   };
   
   const research_ground = await require('./research-ground')(config);

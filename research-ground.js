@@ -12,6 +12,38 @@ const session = require('express-session');
 const { MongoClient } = require('mongodb');
 
 const init = async function(config) {
+  // idをWebIDに変換する関数が設定されてなければ以下の
+  // 関数で処理する。(かなり適当)
+  if (!config.identity.id2webid) {
+    config.server.id2webid = function(id) {
+      const hostname = config.auth.issuer.match(/^https:\/\/([^\/]+).*$/)[1];
+      return 'https://'+hostname+'/people/'+id+'#me';
+    };
+  }
+  // WebIDをidに変換する関数が設定されてなければ以下の
+  // 関数で処理する。この関数でnullが返される場合には
+  // ログインが許可されない。
+  if (!config.server.webid2id) {
+    config.server.webid2id = function(webid) {
+      const m = webid.match(/^.*\/([^\/]+)#[^#]+$/);
+      if (!m) return null;
+      return m[1];
+    };
+  }
+  // idに応じてディレクトリの階層を決定する関数
+  // (デフォルト実装は階層化しないという実装)
+  if (!config.identity.classifier) {
+    config.identity.classifier = function(id) {
+      return '/';
+    };
+  }
+  // ファイル提出を検知して処理するための関数
+  if (!config.files.hook) {
+    config.files.hook = function(path,uid,utime) {
+      // do nothing.
+    };
+  }
+
   const files_app = await require('./files_app')(config);
   const auth = await require('./auth')(config);
   auth.set_files_app(files_app);

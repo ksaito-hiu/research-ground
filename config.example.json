@@ -4,7 +4,19 @@
   "comment1": "以下はサーバー全体の設定",
   "server": {
     "port": "8080",
-    "mount_path": "/research-ground"
+    "mount_path": "/research-ground",
+    "views": "./views",
+    "session": {
+      "secret": "some secret string",
+      "maxAge": 10800000
+    }
+  },
+
+  "comment1.5": "WebIDなどに関する処理の設定",
+  "identity": {
+    "webid2id": null,
+    "id2webid": null,
+    "classifier": null
   },
 
   "comment2": "認証に使用するOpenID ConnectのOPに関する設定",
@@ -18,7 +30,8 @@
 
   "comment3": "課題提出機能に関する設定",
   "files": {
-    "root": "./files/"
+    "root": "./files/",
+    "hook": null
   },
 
   "comment4": "管理者(教師)のWebID",
