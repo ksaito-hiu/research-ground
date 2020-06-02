@@ -10,6 +10,7 @@
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
+const cookieParser = require('cookie-parser');
 const { MongoClient } = require('mongodb');
 const i18n = require('i18n');
 
@@ -80,6 +81,9 @@ const init = async function(config) {
     secure: true,
     cookie: { maxAge: config.server.session.maxAge }
   }));
+
+  app.use(cookieParser());
+  app.use(express.static(path.join(__dirname, 'public')));
 
   app.use('/auth',auth);
 

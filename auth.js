@@ -73,6 +73,8 @@ const init = async function(config) {
       }
       req.session.webid = webid;
       req.session.uid = uid;
+      res.cookie('webid', webid, {maxAge: config.server.session.maxAge });
+      res.cookie('uid', uid, {maxAge: config.server.session.maxAge });
       const utime = new Date().getTime();
       await colActions.insertOne({type:'login',utime,"uid":uid});
 
@@ -106,6 +108,8 @@ const init = async function(config) {
     }
     req.session.webid = null;
     req.session.uid = null;
+    res.clearCookie('webid');
+    res.clearCookie('uid');
     const theUrl = client.endSessionUrl(params);
     res.redirect(theUrl);
   });
