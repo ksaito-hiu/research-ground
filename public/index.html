@@ -14,10 +14,14 @@
        const p = document.querySelector("#message");
        const webid = document.cookie.replace(/(?:(?:^|.*;\s*)webid\s*\=\s*([^;]*).*$)|^.*$/, "$1");
        const uid = document.cookie.replace(/(?:(?:^|.*;\s*)uid\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+       const admin = document.cookie.replace(/(?:(?:^|.*;\s*)admin\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+       const sa = document.cookie.replace(/(?:(?:^|.*;\s*)sa\s*\=\s*([^;]*).*$)|^.*$/, "$1");
        if (!!webid)
          p.textContent = `You are logged in as ${uid}.`;
        else
          p.textContent = 'You are not logged in.';
+       if (admin==='true') p.textContent += '(admin)';
+       if (sa==='true') p.textContent += '(SA)';
      }
      window.addEventListener('load',init);
     </script>
