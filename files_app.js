@@ -47,11 +47,12 @@ const init = async function(config) {
   const dirIndex = async function(req,res,next) {
     const the_path = config.files.root + req.path;
     const stats = await stat(the_path);
-    if (stats.isDirectory()) {
+    if (!!stats && stats.isDirectory()) {
       if (the_path.endsWith('/')) {
         const files = await readdir(the_path);
         files.unshift(parentDir);
-        res.render('files/dir_index',{files});
+        let c_path = path.join(config.server.mount_path,'/files/',req.path);
+        res.render('files/dir_index',{c_path,files});
         return;
       } else {
         const basename = path.basename(the_path);
