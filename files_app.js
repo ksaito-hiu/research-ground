@@ -19,6 +19,8 @@ const init = async function(config) {
     colActions = await db.collection('actions');
   };
 
+  // ファイルアップロードのためのミドルウェア
+  // loginCheck,permissionCheckは済んでる前提
   const storage = multer.diskStorage({
     destination: function(req,file,cb) {
       const webid = req.session.webid;
@@ -39,6 +41,22 @@ const init = async function(config) {
   });
   const upload = multer({storage: storage});
 
+  // ファイルアップロードのためのミドルウェア
+  // REST API用
+  // loginCheck,permissionCheckは済んでる前提
+  const storageREST = multer.diskStorage({
+    destination: function(req,file,cb) {
+      const the_path = path.join(config.files.root,req.path);
+      const p_path = path.dirname(the_path);
+      cb(null,p_path);
+    },
+    filename: function (req,file,cb) {
+      const name = file.originalname;
+      cb(null,name);
+    }
+  });
+  const uploadREST = multer({storage: storageREST});
+
   // express.staticの前に置くことでディレクトリの
   // indexを表示できるようにするミドルウェア
   // ただし、下の方にあるloginCheckとpermissionCheckの
@@ -48,16 +66,22 @@ const init = async function(config) {
     const the_path = config.files.root + req.path;
     const stats = await stat(the_path);
     if (!!stats && stats.isDirectory()) {
-      if (the_path.endsWith('/')) {
+      if (req.accepts('json')==='json') {
         const files = await readdir(the_path);
-        files.unshift(parentDir);
-        let c_path = path.join(config.server.mount_path,'/files/',req.path);
-        res.render('files/dir_index',{c_path,files});
+        res.json({files});
         return;
       } else {
-        const basename = path.basename(the_path);
-        res.redirect('./'+basename+'/');
-        return;
+        if (the_path.endsWith('/')) {
+          const files = await readdir(the_path);
+          files.unshift(parentDir);
+          let c_path = path.join(config.server.mount_path,'/files/',req.path);
+          res.render('files/dir_index',{c_path,files});
+          return;
+        } else {
+          const basename = path.basename(the_path);
+          res.redirect('./'+basename+'/');
+          return;
+        }
       }
     }
     next();
@@ -352,6 +376,57 @@ const init = async function(config) {
              permissionCheck,
              dirIndex,
              staticRouter);
+
+  // ファイルやディレクトリを作成，もしくはファイルの更新
+  // パスの最後に'/'が着いてるかどうかで，ファイルかディレクトリか
+  // を区別することにする。
+  router.put('/*',loginCheck,permissionCheck,uploadREST.single('file'),async (req,res)=>{
+    const webid = req.session.webid;
+    const uid = req.session.uid;
+    try {
+      const r_path = path.join(config.files.root,req.path);
+      const d_path = path.dirname(r_path);
+      let stats = await stat(d_path);
+      if (!!stats && stats.isDirectory()) {
+        //const utime = new Date().getTime();
+        if (r_path.endsWith('/')) {
+          await makeDir(r_path);
+          //await colActions.insertOne({type:'mkdir',utime,"path":dirPath});
+          res.json({ok: true});
+        } else {
+          //req.fileがアップされたファイルの情報
+          //await colActions.insertOne({type:'upload',utime,"path":dirPath});
+          res.json({ok: true});
+        }
+      } else {
+        res.json({ok: false, msg: 'There is no parent directory.'});
+      }
+    } catch(e) {
+      // ほんとはもっとエラーの詳細も返したい。
+      res.json({ok: false});
+    }
+  });
+
+  // 単独のファイル，またはディレクトリの削除
+  // ディレクトリは空でなければ消せない。
+  router.delete('/*',loginCheck,permissionCheck,async (req,res)=>{
+    const webid = req.session.webid;
+    const uid = req.session.uid;
+    try {
+      const r_path = config.files.root+req.path;
+      const stats = await stat(r_path);
+      if (!!stats && stats.isDirectory()) {
+        await removeDir(r_path);
+        res.json({ok: true});
+      } else {
+        await removeFile(r_path);
+        res.json({ok: true});
+      }
+    } catch(e) {
+      // ほんとはもっとエラーの詳細も返したい。
+      res.json({ok: false});
+    }
+  });
 
   // auth.jsの中から呼び出されて、uidのファイル提出場所
   // のデイレクトリが存在するかどうかチェックし、無かったら
