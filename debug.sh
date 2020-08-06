@@ -1,12 +1,12 @@
 #!/bin/bash
+## 上の行#!/bin/shを使うと下のanyenvの設定で
+## "eval: source: not found"になっちゃう
 
-# You need to setup node.js.
-export PATH="/usr/local/anyenv/bin:$PATH"
-export ANYENV_ROOT="/usr/local/anyenv"
-export ANYENV_DEFINITION_ROOT="/usr/local/anyenv-install"
-eval "$(anyenv init -)"
-# 上の行#!/bin/shを使うと"eval: source: not found"に
-# なっちゃう
+## You need to setup node.js.
+#export PATH="/usr/local/anyenv/bin:$PATH"
+#export ANYENV_ROOT="/usr/local/anyenv"
+#export ANYENV_DEFINITION_ROOT="/usr/local/anyenv-install"
+#eval "$(anyenv init -)"
 
 
 # function to find the real file by pursuing symbolic links
