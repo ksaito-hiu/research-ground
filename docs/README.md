@@ -74,9 +74,10 @@ research-ground documentation
 * このシステムで扱う科目
     + Collection name: courses
     + 科目ID
-        - 科目CD(大学で決めてるやつ)_クラス
-        - クラスは複数クラス展開している場合区別する文字列
+        - 「科目CD(大学で決めてるやつ)_クラス」と入力するべし
+        - 「`_クラス`」は複数クラス展開している場合区別する文字列
     + 科目名
+        - 複数クラス展開してる場合は区別できるようにすると吉。
     + format: `{ id: 'E1066_ksaito', name: 'モバイルアプリ演習(齋藤健司クラス)' }`
 * 教員アカウント
     + Collection name: teachers

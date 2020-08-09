@@ -32,6 +32,7 @@ const init = async function(config) {
 
   // ログインチェック AND uid取得
   function loginCheck(req,res,next) {
+if (true) {console.log('debug GAHA');next();return;} // デバッグ時に有効にすると楽
     let webid = null;
     if (!!req.session && !!req.session.webid)
       webid = req.session.webid;
@@ -58,6 +59,7 @@ const init = async function(config) {
   // 管理者かどうかのチェック。上のloginCheckの後で
   // 使われることを想定している。(セッションのuidを使うから)
   function adminCheck(req,res,next) {
+if (true) {console.log('debug GAHA');next();return;} // デバッグ時に有効にすると楽
     const uid = req.session.uid;
     if (! isAdmin(uid,null)) {
       o.msg = 'You do not have parmissions to edit course data.';
@@ -109,31 +111,31 @@ const init = async function(config) {
   router.get('/courses',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = config.server.mount_path;
-    o.courses = await colCourses.find({}).toArray();
-    o.course_id = o.course_name = '';
+    o.courses = await colCourses.find({}).sort({id:1}).toArray();
+    o.id = o.name = '';
     o.msg = 'This page is for course admin.';
     res.render('admin/courses',o);
   });
   router.get('/courses_search',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = config.server.mount_path;
-    o.courses = await colCourses.find({}).toArray();
+    o.courses = await colCourses.find({}).sort({id:1}).toArray();
     try {
-      const course_id = req.query.course_id;
-      if (!course_id) {
-        o.msg = 'The course_id should not be empty.';
-        o.course_id = o.course_name = '';
+      const id = req.query.id;
+      if (!id) {
+        o.msg = 'The course id should not be empty.';
+        o.id = o.name = '';
         res.render('admin/courses',o);
         return;
       }
-      const ret = await colCourses.findOne({id:course_id});
+      const ret = await colCourses.findOne({id});
       if (!ret) {
-        o.msg = `The course(id=${course_id}) was not found.`;
-        o.course_id = o.course_name = '';
+        o.msg = `The course(id=${id}) was not found.`;
+        o.id = o.name = '';
       } else {
-        o.msg = `The course(id=${course_id}) was found.`;
-        o.course_id = ret.id;
-        o.course_name = ret.name;
+        o.msg = `The course(id=${id}) was found.`;
+        o.id = ret.id;
+        o.name = ret.name;
       }
       res.render('admin/courses',o);
     } catch(err) {
@@ -141,27 +143,24 @@ const init = async function(config) {
       res.render('error.ejs',o);
     }
   });
-  router.get('/courses_add',loginCheck,adminCheck,async (req,res)=>{
+  router.get('/courses_regist',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = config.server.mount_path;
     try {
-      const course_id = req.query.course_id;
-      const course_name = req.query.course_name;
-      if (!course_id || !course_name) {
-        o.msg = 'The course_id or course_name should not be empty.';
-        o.course_id = o.course_name = '';
-        o.courses = await colCourses.find({}).toArray();
+      const id = req.query.id;
+      const name = req.query.name;
+      if (!id || !name) {
+        o.msg = 'The course id or name should not be empty.';
+        o.id = o.name = '';
+        o.courses = await colCourses.find({}).sort({id:1}).toArray();
         res.render('admin/courses',o);
         return;
       }
-      const course_data = {
-        id: course_id,
-        name: course_name
-      };
-      const ret = await colCourses.updateOne({id:course_id},{$set:course_data},{upsert:true});
+      const course_data = {id,name};
+      const ret = await colCourses.updateOne({id},{$set:course_data},{upsert:true});
       o.msg = 'A course was registered.';
-      o.course_id = o.course_name = '';
-      o.courses = await colCourses.find({}).toArray();
+      o.id = o.name = '';
+      o.courses = await colCourses.find({}).sort({id:1}).toArray();
       res.render('admin/courses',o);
     } catch(err) {
       o.msg = err.toString();
@@ -172,23 +171,23 @@ const init = async function(config) {
     const o = {}; // ejsにわたすデーター
     o.baseUrl = config.server.mount_path;
     try {
-      const course_id = req.query.course_id;
-      if (!course_id) {
-        o.msg = 'The course_id should not be empty.';
-        o.course_id = o.course_name = '';
-        o.courses = await colCourses.find({}).toArray();
+      const id = req.query.id;
+      if (!id) {
+        o.msg = 'The course id should not be empty.';
+        o.id = o.name = '';
+        o.courses = await colCourses.find({}).sort({id:1}).toArray();
         res.render('admin/courses',o);
         return;
       }
-      const ret = await colCourses.deleteOne({id:course_id});
+      const ret = await colCourses.deleteOne({id});
       if (ret.deletedCount===1) {
-        o.msg = `A course(id=${course_id}) was deleted.`;
-        o.course_id = o.course_name = '';
+        o.msg = `A course(id=${id}) was deleted.`;
+        o.id = o.name = '';
       } else {
-        o.msg = `A course(id=${course_id}) could not be deleted.`;
-        o.course_id = o.course_name = '';
+        o.msg = `A course(id=${id}) could not be deleted.`;
+        o.id = o.name = '';
       }
-      o.courses = await colCourses.find({}).toArray();
+      o.courses = await colCourses.find({}).sort({id:1}).toArray();
       res.render('admin/courses',o);
     } catch(err) {
       o.msg = err.toString();
@@ -205,9 +204,73 @@ const init = async function(config) {
 
   // 教員の管理(管理者のみ)
   router.get('/teachers',loginCheck,adminCheck,async (req,res)=>{
-    const webid = req.session.webid;
-    const uid = req.session.uid;
+    const selected_course = req.query.selected_course;
+    const o = {}; // ejsにわたすデーター
+    o.baseUrl = config.server.mount_path;
+    o.courses = await colCourses.find({}).sort({id:1}).toArray();
+    if (!selected_course) { // コースが選択されてない場合
+      o.selected_course = "";
+      o.teachers = [];
+      o.msg = 'At first select cource id.';
+      res.render('admin/teachers',o);
+      return;
+    }
+    o.selected_course = selected_course;
+    o.teachers = await colTeachers.find({course:selected_course}).sort({account:1}).toArray();
+    o.msg = 'The course is selected.';
+    res.render('admin/teachers',o);
   });
+  router.get('/teachers_regist',loginCheck,adminCheck,async (req,res)=>{
+    const course = req.query.course;
+    const account = req.query.account;
+    const o = {}; // ejsにわたすデーター
+    o.baseUrl = config.server.mount_path;
+    o.courses = await colCourses.find({}).sort({id:1}).toArray();
+    if (!course || !account) { // コースやアカウントの指定がない場合
+      o.selected_course = "";
+      o.teachers = [];
+      o.msg = 'ERROR! course or account is not specified.';
+      res.render('admin/teachers',o);
+      return;
+    }
+    const teacher_data = {account,course};
+    const ret = await colTeachers.updateOne(teacher_data,{$set:teacher_data},{upsert:true});
+    o.selected_course = course;
+    o.teachers = await colTeachers.find({course}).sort({account:1}).toArray();
+    o.msg = 'A new teacher registerd.';
+    res.render('admin/teachers',o);
+  });
+  router.get('/teachers_del',loginCheck,adminCheck,async (req,res)=>{
+    const o = {}; // ejsにわたすデーター
+    o.baseUrl = config.server.mount_path;
+    try {
+      const course = req.query.course;
+      const account = req.query.account;
+      o.courses = await colCourses.find({}).sort({id:1}).toArray();
+      if (!course || !account) {
+        o.msg = 'The course and account should be specified.';
+        o.selected_course = "";
+        o.teachers = [];
+        res.render('admin/teachers',o);
+        return;
+      }
+      const ret = await colTeachers.deleteOne({course,account});
+      if (ret.deletedCount===1)
+        o.msg = `The teacher(${account}) of the course(${course}) was deleted.`;
+      else
+        o.msg = `The teacher(${account}) of the course(${course}) could not be deleted.`;
+      o.selected_course = course;
+      o.teachers = await colTeachers.find({course}).sort({account:1}).toArray();
+      res.render('admin/teachers',o);
+    } catch(err) {
+      o.msg = err.toString();
+      res.render('error.ejs',o);
+    }
+  });
+
+
+
+
 
   // SAの管理(管理者と教員)
   router.get('/assistants',loginCheck,async (req,res)=>{

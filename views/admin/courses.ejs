@@ -4,25 +4,24 @@
     <meta charset="UTF-8">
     <title>Management of Courses</title>
     <script>
-      function search() {
-        const c = encodeURI(document.querySelector('#course_id').value);
-        location.href=`./courses_search?course_id=${c}`;
+      function regist() {
+        let url = './courses_regist';
+        url += `?id=${document.querySelector('#id').value}`;
+        url += `&name=${document.querySelector('#name').value}`;
+        location.href=encodeURI(url);
       }
       function del() {
-        const c = encodeURI(document.querySelector('#course_id').value);
-        location.href=`./courses_del?course_id=${c}`;
-      }
-      function regist() {
-        let url = './courses_add';
-        url += `?course_id=${document.querySelector('#course_id').value}`;
-        url += `&course_name=${document.querySelector('#course_name').value}`;
-        location.href=encodeURI(url);
+        const c = encodeURI(document.querySelector('#id').value);
+        location.href=`./courses_del?id=${c}`;
       }
       function init() {
         const select = document.querySelector('#courses');
-        const c_id = document.querySelector('#course_id');
+        const c_id = document.querySelector('#id');
         select.addEventListener('change',function(e){
-          c_id.value = e.target.value;
+          if (e.target.value) {
+            const c = e.target.value;
+            location.href=`./courses_search?id=${c}`;
+          }
         });
       }
       window.addEventListener('load',init);
@@ -33,15 +32,17 @@
     <p>Message: <%=msg%></p>
     <p>Registered course IDs:
       <select id="courses">
+        <option value="" selected="true">select for search</options>
         <% for (c of courses) { %>
         <option value="<%= c.id %>"><%= c.id %></options>
         <% } %>
       </select></p>
-    <p>Course ID: <input type="text" id="course_id" value="<%=course_id%>"/>
-      <button type="button" onclick="search();">Search</button>
+    <p>Course ID: <input type="text" id="id" value="<%=id%>"/></p>
+    <p>Course Name: <input type="text" id="name" size="25" value="<%=name%>"/>
+    <p>
+      <button type="button" onclick="regist();">Registrate</button>
       <button type="button" onclick="del();">Delete</button>
-      <button type="button" onclick="regist();">Registrate</button></p>
-    <p>Course Name: <input type="text" id="course_name" size="25" value="<%=course_name%>"/></p>
+    </p>
     <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
   </body>
 </html>
