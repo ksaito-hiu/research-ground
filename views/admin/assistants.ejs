@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Management of Assistants</title>
+    <script>
+      function regist() {
+        let url = './assistants_regist';
+        url += `?course=${document.querySelector('#courses').value}`;
+        url += `&account=${document.querySelector('#new_assistant').value}`;
+        location.href=encodeURI(url);
+      }
+      function del(account) {
+        const c = encodeURI(document.querySelector('#courses').value);
+        if (c) {
+          location.href=`./assistants_del?course=${c}&account=${account}`;
+        }
+      }
+      function init() {
+        const select = document.querySelector('#courses');
+        const c_id = document.querySelector('#id');
+        select.addEventListener('change',function(e){
+          if (e.target.value) {
+            const c = e.target.value;
+            location.href=`./assistants?selected_course=${c}`;
+          }
+        });
+      }
+      window.addEventListener('load',init);
+    </script>
+  </head>
+  <body>
+    <h1>Management of Assistants</h1>
+    <p>Message: <%=msg%></p>
+    <p>Course IDs:
+      <select id="courses">
+        <option value="">select for search</options>
+        <% for (c of courses) { %>
+          <% if (c.id===selected_course) { %>
+            <option value="<%= c.id %>" selected="true"><%= c.id %></options>
+          <% } else { %>
+            <option value="<%= c.id %>"><%= c.id %></options>
+          <% } %>
+        <% } %>
+      </select></p>
+    <ul>
+      <% for (t of assistants) { %>
+      <li><%=t.account%><button type="button" onclick="del('<%=t.account%>');">Delete</button></li>
+      <% } %>
+      <li><input type="text" id="new_assistant" value=""/><button type="button" onclick="regist();">Registrate a new assistant</button></li>
+    </ul>
+    <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Management of Students</title>
+    <script>
+      function init() {
+        const select = document.querySelector('#courses');
+        const c_id = document.querySelector('#id');
+        select.addEventListener('change',function(e){
+          if (e.target.value) {
+            const c = e.target.value;
+            location.href=`./students?selected_course=${c}`;
+          }
+        });
+      }
+      window.addEventListener('load',init);
+    </script>
+  </head>
+  <body>
+    <h1>Management of Students</h1>
+    <p>Message: <%=msg%></p>
+    <p>Course IDs:
+      <select id="courses">
+        <option value="">select for search</options>
+        <% for (c of courses) { %>
+          <% if (c.id===selected_course) { %>
+            <option value="<%= c.id %>" selected="true"><%= c.id %></options>
+          <% } else { %>
+            <option value="<%= c.id %>"><%= c.id %></options>
+          <% } %>
+        <% } %>
+      </select></p>
+    <form action="<%=baseUrl%>/admin/students_regist" method="post">
+      <input type="hidden" name="course" value="<%=selected_course%>"/>
+      <textarea name="accounts" cols="20" rows="10"><%=students%></textarea>
+      <p><input type="submit" value="Registrate"/></p>
+    </form>
+    <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+  </body>
+</html>

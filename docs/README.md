@@ -94,14 +94,14 @@ research-ground documentation
 * 課題情報
     + Collection name: excercises
     + 自動で付けられる課題ID
-    + 課題の名前
+    + 課題の名前(名前というよりはIDのような記号や数字)
     + 何の科目の課題か
     + 何単元目の課題か
     + 課題の出題場所(URL) 問題が掲載されているURL
     + 課題の提出場所(URL) 学生の提出場所のrootからのpathとファイル名を含むURL
     + 配点(最高点数。原則、0:未提出,1:不完全,2:合格、にしたい)
     + 重み(難易度。あった方良いと思う)
-    + format: `{ id: '???', name: '01-01', course: 'E1066_ksaito', unit: 1, question: 'https://....', submit: 'https://...', allocation: 2, weight: 5 }`
+    + format: `{ _id: '???', name: '01-01', course: 'E1066_ksaito', unit: 1, question: 'https://....', submit: 'https://...', allocation: 2, weight: 5 }`
 * 評価(採点)の管理(課題と学生の組に対して)
     + Collection name: marks
     + 自動で付けられる評価ID
@@ -118,5 +118,5 @@ research-ground documentation
     + 自動のID
     + 対象とする課題のID
     + フィードバック(コメント)の文面
-    + format: `{ id: '???', excercise: '???' , feedback: '○△□ができていません。' }`
+    + format: `{ _id: '???', excercise: '???' , feedback: '○△□ができていません。' }`
 
