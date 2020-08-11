@@ -462,67 +462,42 @@ const init = async function(config) {
   // 課題の管理(管理者と教員)
   router.get('/excercises',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
-    const selected_course = req.query.selected_course;
-    const selected_excercise = req.query.selected_excercise;
-    const o = {}; // ejsにわたすデーター
-    o.baseUrl = config.server.mount_path;
-    o.courses = await colCourses.find({}).sort({id:1}).toArray();
-    if (!selected_course) { // コースが選択されてない時の処理
-      o.selected_course = "";
-      o.selected_excercise = "";
-      o.excercises = [];
-      o.name=o.course=o.unit=o.question="";
-      o.submit=o.allocation=o.weight="";
-      o.msg = 'At first, select cource id.'
-      res.render('admin/excercises',o);
-      return;
-    }
-    if (!isAdmin(uid) && !isTeacher(uid,selected_course)) { // 権限が無い時の処理
-      o.selected_course = "";
-      o.selected_excercise = "";
-      o.excercises = [];
-      o.name=o.course=o.unit=o.question="";
-      o.submit=o.allocation=o.weight="";
+    if (!isAdmin(uid) && !isTeacher(uid)) { // 権限が無い時の処理
+      o.course=o.no=o.sub_no=o.category="";
+      o.question=o.submit=o.allocation=o.weight="";
       o.msg = `You do not have parmission to edit the course(${selected_course}).`;
       res.render('admin/excercises',o);
       return;
     }
-    const cond = {course:selected_course};
-    o.excercises = await colExcercises.find(cond).sort({name:1}).toArray();
-    if (!o.excercises) o.excercises = [];
-    if (!selected_excercise) { // 課題が選択されていない時の処理
-      o.selected_course = selected_course;
-      o.selected_excercise = "";
-      o.name=o.course=o.unit=o.question="";
-      o.submit=o.allocation=o.weight="";
-      o.msg = 'Then, select excercise name.'
-      res.render('admin/excercises',o);
-      return;
-    }
-    let se = null;
-    for (e of o.excercises) {
-      if (e.name === selected_excercise) {
-        se = e;
-        break;
+    const course = req.query.course;
+    const no = req.query.no;
+    const sub_no = req.query.sub_no;
+    const o = {}; // ejsにわたすデーター
+    o.baseUrl = config.server.mount_path;
+    o.courses = await colCourses.find({}).sort({id:1}).toArray();
+    if (course && no && sub_no) { // 課題が指定されてる時は検索
+      const cond = {course,no,sub_no};
+      const se = await colExcercises.findOne(cond);
+      if (se) {
+        o.course     = se.course;
+        o.no         = se.no;
+        o.sub_no     = se.sub_no;
+        o.category   = se.category;
+        o.question   = se.question;
+        o.submit     = se.submit;
+        o.allocation = se.allocation;
+        o.weight     = se.weight;
+        o.msg = 'The course and the excercise are specified.';
+      } else {
+        o.course=course; o.no=no; o.sub_no=sub_no;
+        o.category=o.question=o.submit=o.allocation=o.weight="";
+        o.msg = 'The excercise could not be found.';
       }
-    }
-    if (se) {
-      o.selected_course = selected_course;
-      o.selected_excercise = selected_excercise;
-      o.name       = se.name;
-      o.course     = se.course;
-      o.unit       = se.unit;
-      o.question   = se.question;
-      o.submit     = se.submit;
-      o.allocation = se.allocation;
-      o.weight     = se.weight;
     } else {
-      o.selected_course = selected_course;
-      o.selected_excercise = selected_excercise;
-      o.name=o.course=o.unit=o.question="";
-      o.submit=o.allocation=o.weight="";
+      o.course=o.no=o.sub_no=o.category="";
+      o.question=o.submit=o.allocation=o.weight="";
+      o.msg = 'At first, select cource id.'
     }
-    o.msg = 'The course and the excercise are specified.';
     res.render('admin/excercises',o);
   });
   router.get('/excercises_regist',loginCheck,async (req,res)=>{
@@ -531,90 +506,145 @@ const init = async function(config) {
     o.baseUrl = config.server.mount_path;
     o.courses = await colCourses.find({}).sort({id:1}).toArray();
     const course = req.query.course;
-    const name = req.query.name;
-    if (!course || !name) {
-      o.selected_course = course || "";
-      o.selected_excercise = name || "";
-      o.excercises = [];
-      o.name=o.course=o.unit=o.question="";
-      o.submit=o.allocation=o.weight="";
-      o.msg = 'ERROR! The course or the excercise was not specified.'
+    if (!course) {
+      o.course=o.no=o.sub_no=o.category="";
+      o.question=o.submit=o.allocation=o.weight="";
+      o.msg = 'ERROR! The course was not specified.'
       res.render('admin/excercises',o);
       return;
     }
     if (!isAdmin(uid) && !isTeacher(uid,course)) {
-      o.selected_course = "";
-      o.selected_excercise = "";
-      o.excercises = [];
-      o.name=o.course=o.unit=o.question="";
-      o.submit=o.allocation=o.weight="";
+      o.course=o.no=o.sub_no=o.category="";
+      o.question=o.submit=o.allocation=o.weight="";
       o.msg = `You do not have parmission to edit the course(${selected_course}).`;
       res.render('admin/excercises',o);
       return;
     }
-    const unit = req.query.unit || 1;
-    const question = req.query.question || 'https://dummy.org/question.html';
-    const submit = req.query.submit || 'https://dummy.org/excercise.html';
+    const no = req.query.no;
+    const sub_no = req.query.sub_no;
+    if (!no || !sub_no) {
+      o.course=o.no=o.sub_no=o.category="";
+      o.question=o.submit=o.allocation=o.weight="";
+      o.msg = 'ERROR! The excercise was not specified.'
+      res.render('admin/excercises',o);
+      return;
+    }
+    const category = req.query.category || 'k';
+    const question = req.query.question || 'https://dummy.org/'+category+no+'-'+sub_no+'.html';
+    const submit = req.query.submit || 'https://dummy.org/submit/'+category+no+'-'+sub_no+'.html';
     const allocation = parseInt(req.query.allocation) || 2;
     const weight = parseFloat(req.query.weight) || 5;
 
-    const cond = {course,name};
-    const data = {course,name,unit,question,submit,allocation,weight};
+    const cond = {course,no,sub_no};
+    const data = {course,no,sub_no,category,question,submit,allocation,weight};
     const ret = await colExcercises.updateOne(cond,{$set:data},{upsert:true});
 
-    o.excercises = await colExcercises.find(cond).sort({name:1}).toArray();
-    if (!o.excercises) o.excercises = [];
-    o.selected_course = course;
-    o.selected_excercise = "";
-    o.name=o.course=o.unit=o.question="";
-    o.submit=o.allocation=o.weight="";
-    o.msg = `The excercise(${name}) was registered.`;
+    o.course=o.no=o.sub_no=o.category="";
+    o.question=o.submit=o.allocation=o.weight="";
+    o.msg = `The excercise(${category}${no}-${sub_no}) was registered.`;
     res.render('admin/excercises',o);
   });
   router.get('/excercises_del',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
     const course = req.query.course;
-    const name = req.query.name;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = config.server.mount_path;
     o.courses = await colCourses.find({}).sort({id:1}).toArray();
+    if (!course) {
+      o.course=o.no=o.sub_no=o.category="";
+      o.question=o.submit=o.allocation=o.weight="";
+      o.msg = 'ERROR! The course was not specified.'
+      res.render('admin/excercises',o);
+      return;
+    }
     if (!isAdmin(uid) && !isTeacher(uid,course)) {
-      o.selected_course = "";
-      o.selected_excercise = "";
-      o.excercises = [];
-      o.name=o.course=o.unit=o.question="";
-      o.submit=o.allocation=o.weight="";
-      o.msg = `You do not have parmission to edit the course(${selected_course}).`;
+      o.course=o.no=o.sub_no=o.category="";
+      o.question=o.submit=o.allocation=o.weight="";
+      o.msg = `You do not have parmission to edit the course(${course}).`;
       res.render('admin/excercises',o);
       return;
     }
-    if (!course || !name) {
-      o.selected_course = course || "";
-      o.selected_excercise = name || "";
-      o.excercises = [];
-      o.name=o.course=o.unit=o.question="";
-      o.submit=o.allocation=o.weight="";
-      o.msg = 'ERROR! The course or the excercise was not specified.'
+    const no = req.query.no;
+    const sub_no = req.query.sub_no;
+    if (!no || !sub_no) {
+      o.course=o.no=o.sub_no=o.category="";
+      o.question=o.submit=o.allocation=o.weight="";
+      o.msg = 'ERROR! The excercise was not specified.'
       res.render('admin/excercises',o);
       return;
     }
-    const cond = {course,name};
+    const cond = {course,no,sub_no};
     const ret = await colExcercises.deleteMany(cond);
     if (ret.deleteCount===0)
-      o.msg = `The excercise(course=${course},name=${name}) could not be deleted.`;
+      o.msg = `The excercise(course=${course},no=${no},sub_no=${sub_no}) could not be deleted.`;
     else
-      o.msg = `The excercise(course=${course},name=${name}) was deleted.`;
+      o.msg = `The excercise(course=${course},no=${no},sub_no=${sub_no}) was deleted.`;
 
-    o.excercises = await colExcercises.find(cond).sort({name:1}).toArray();
-    if (!o.excercises) o.excercises = [];
-    o.selected_course = course;
-    o.selected_excercise = "";
-    o.name=o.course=o.unit=o.question="";
-    o.submit=o.allocation=o.weight="";
+    o.course=o.no=o.sub_no=o.category="";
+    o.question=o.submit=o.allocation=o.weight="";
     res.render('admin/excercises',o);
   });
   
 
+
+
+  router.get('/backup',loginCheck,adminCheck,async (req,res)=>{
+    const target = req.query.target;
+    const course = req.query.course;
+    if (!target && !course) {
+      const o = {}; // ejsにわたすデーター
+      o.baseUrl = config.server.mount_path;
+      o.courses = await colCourses.find({}).sort({id:1}).toArray();
+      res.render('admin/backup',o);
+      return;
+    }
+    if (!target) { // 通常ありえないけど
+      const o = {}; // ejsにわたすデーター
+      o.baseUrl = config.server.mount_path;
+      o.courses = await colCourses.find({}).sort({id:1}).toArray();
+      res.render('admin/backup',o);
+      return;
+    }
+    let data;
+    if (target==='courses')
+      if (course)
+        data = await colCourses.find({id:course}).sort({id:1}).toArray();
+      else
+        data = await colCourses.find({}).sort({id:1}).toArray();
+    else if (target==='teachers')
+      if (course)
+        data = await colTeachers.find({course}).sort({id:1}).toArray();
+      else
+        data = await colTeachers.find({}).sort({id:1}).toArray();
+    else if (target==='assistants')
+      if (course)
+        data = await colAssistants.find({course}).sort({id:1}).toArray();
+      else
+        data = await colAssistants.find({}).sort({id:1}).toArray();
+    else if (target==='students')
+      if (course)
+        data = await colStudents.find({course}).sort({id:1}).toArray();
+      else
+        data = await colStudents.find({}).sort({id:1}).toArray();
+    else if (target==='excercises')
+      if (course)
+        data = await colExcercises.find({course}).sort({id:1}).toArray();
+      else
+        data = await colExcercises.find({}).sort({id:1}).toArray();
+    else if (target==='marks')
+      if (course)
+        data = await colMarks.find({course}).sort({id:1}).toArray();
+      else
+        data = await colMarks.find({}).sort({id:1}).toArray();
+    else if (target==='feedbacks')
+      if (course)
+        data = await colFeedbacks.find({course}).sort({id:1}).toArray();
+      else
+        data = await colFeedbacks.find({}).sort({id:1}).toArray();
+    else
+      data = {"error":"specified target is not valid."};
+    res.json({data});
+  });
 
 
 

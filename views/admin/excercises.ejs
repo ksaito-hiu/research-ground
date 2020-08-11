@@ -4,11 +4,18 @@
     <meta charset="UTF-8">
     <title>Management of Excercises</title>
     <script>
+      function search() {
+        const course = document.querySelector('#courses').value;
+        const no = document.querySelector('#no').value;
+        const sub_no = document.querySelector('#sub_no').value;
+        location.href=encodeURI(`./excercises?course=${course}&no=${no}&sub_no=${sub_no}`);
+      }
       function regist() {
         let url = './excercises_regist';
-        url += `?name=${document.querySelector('#name').value}`;
-        url += `&course=${document.querySelector('#courses').value}`;
-        url += `&unit=${document.querySelector('#unit').value}`;
+        url += `?course=${document.querySelector('#courses').value}`;
+        url += `&no=${document.querySelector('#no').value}`;
+        url += `&sub_no=${document.querySelector('#sub_no').value}`;
+        url += `&category=${document.querySelector('#category').value}`;
         url += `&question=${document.querySelector('#question').value}`;
         url += `&submit=${document.querySelector('#submit').value}`;
         url += `&allocation=${document.querySelector('#allocation').value}`;
@@ -17,29 +24,11 @@
       }
       function del() {
         let url = './excercises_del';
-        url += `?name=${document.querySelector('#name').value}`;
-        url += `&course=${document.querySelector('#courses').value}`;
+        url += `?course=${document.querySelector('#courses').value}`;
+        url += `&no=${document.querySelector('#no').value}`;
+        url += `&sub_no=${document.querySelector('#sub_no').value}`;
         location.href=encodeURI(url);
       }
-      function init() {
-        const c_select = document.querySelector('#courses');
-        c_select.addEventListener('change',function(event){
-          const e = "<%=selected_excercise%>";
-          if (event.target.value) {
-            const c = event.target.value;
-            location.href=`./excercises?selected_course=${c}&selected_excercise=${e}`;
-          }
-        });
-        const e_select = document.querySelector('#excercises');
-        e_select.addEventListener('change',function(event){
-          const c = "<%=selected_course%>";
-          if (event.target.value) {
-            const e = event.target.value;
-            location.href=`./excercises?selected_course=${c}&selected_excercise=${e}`;
-          }
-        });
-      }
-      window.addEventListener('load',init);
     </script>
   </head>
   <body>
@@ -47,30 +36,40 @@
     <p>Message: <%=msg%></p>
     <p>Course IDs:
       <select id="courses">
-        <option value="" selected="true">select for search</options>
+        <option value="">select for search</options>
         <% for (c of courses) { %>
-          <% if (c.id===selected_course) { %>
+          <% if (c.id===course) { %>
             <option value="<%= c.id %>" selected="true"><%= c.id %></options>
           <% } else { %>
             <option value="<%= c.id %>"><%= c.id %></options>
           <% } %>
         <% } %>
-      </select>
-    </p>
-    <p>Registered excercise name:
-      <select id="excercises">
-        <option value="">select excercise</options>
-        <% for (e of excercises) { %>
-          <% if (e.name===selected_excercise) { %>
-            <option value="<%= e.name %>" selected="true"><%= e.name %></options>
+      </select>,
+      No:
+      <select id="no">
+        <% for (let i=1;i<100;i++) { %>
+          <% let ii;if(i<10){ii="0"+i;}else{ii=""+i} %>
+          <% if (ii===no) { %>
+            <option value="<%= ii %>" selected="true"><%= ii %></options>
           <% } else { %>
-            <option value="<%= e.name %>"><%= e.name %></options>
+            <option value="<%= ii %>"><%= ii %></options>
+          <% } %>
+        <% } %>
+      </select>,
+      Sub_no:
+      <select id="sub_no">
+        <% for (let i=1;i<100;i++) { %>
+          <% let ii;if(i<10){ii="0"+i;}else{ii=""+i} %>
+          <% if (ii===sub_no) { %>
+            <option value="<%= ii %>" selected="true"><%= ii %></options>
+          <% } else { %>
+            <option value="<%= ii %>"><%= ii %></options>
           <% } %>
         <% } %>
       </select>
+      <button type="button" onclick="search()">Search</button>
     </p>
-    <p>Excercise Name: <input type="text" id="name" size="25" value="<%=name%>"/>
-    <p>Unit: <input type="text" id="unit" size="25" value="<%=unit%>"/>
+    <p>Category: <input type="text" id="category" size="25" value="<%=category%>"/>
     <p>Question URL: <input type="text" id="question" size="25" value="<%=question%>"/>
     <p>Submit URL: <input type="text" id="submit" size="25" value="<%=submit%>"/>
     <p>Allocation: <input type="text" id="allocation" size="25" value="<%=allocation%>"/>

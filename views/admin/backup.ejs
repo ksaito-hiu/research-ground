@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Backup</title>
+    <script>
+      // target引数は何をバックアップするかの対象。
+      // リストボックスでコースが選択されていたらコースごとのバックアップをする。
+      function backup(target) {
+        const course = document.querySelector('#courses').value;
+        let url = `./backup?target=${target}`;
+        if (course)
+          url += `&course=${course}`;
+        location.href=encodeURI(url);
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Management of Courses</h1>
+    <p>If you want to backup for each course, select course id first.</p>
+    <p>Registered course IDs:
+      <select id="courses">
+        <option value="" selected="true">select</options>
+        <% for (c of courses) { %>
+        <option value="<%= c.id %>"><%= c.id %></options>
+        <% } %>
+      </select>
+    </p>
+    <p><button type="button" onclick="backup('courses');">Backup courses</button></p>
+    <p><button type="button" onclick="backup('teachers');">Backup teachers</button></p>
+    <p><button type="button" onclick="backup('assistants');">Backup assistants</button></p>
+    <p><button type="button" onclick="backup('students');">Backup students</button></p>
+    <p><button type="button" onclick="backup('excercises');">Backup excercises</button></p>
+    <p><button type="button" onclick="backup('marks');">Backup marks</button></p>
+    <p><button type="button" onclick="backup('feedbacks');">Backup feedbacks</button></p>
+    <hr/>
+    <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+  </body>
+</html>
