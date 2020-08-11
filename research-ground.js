@@ -51,6 +51,8 @@ const init = async function(config) {
   const auth = await require('./auth')(config);
   auth.set_files_app(files_app);
   const admin = await require('./admin')(config);
+  const marking = await require('./marking')(config);
+  const progress = await require('./progress')(config);
 
   // MongoDBのクライアントを初期化
   const mongo_client = new MongoClient('mongodb://127.0.0.1:27017',{
@@ -63,6 +65,8 @@ const init = async function(config) {
   await files_app.set_mongo_client(mongo_client);
   await auth.set_mongo_client(mongo_client);
   await admin.set_mongo_client(mongo_client);
+  await marking.set_mongo_client(mongo_client);
+  await progress.set_mongo_client(mongo_client);
 
   const app = express();
 
@@ -92,6 +96,10 @@ const init = async function(config) {
   app.use('/files',files_app);
 
   app.use('/admin',admin);
+
+  app.use('/marking',marking);
+
+  app.use('/progress',progress);
 
   app.get('/', (req, res) => {
     let str;
