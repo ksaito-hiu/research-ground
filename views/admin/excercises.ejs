@@ -6,29 +6,36 @@
     <script>
       function search() {
         const course = document.querySelector('#courses').value;
-        const no = document.querySelector('#no').value;
-        const sub_no = document.querySelector('#sub_no').value;
-        location.href=encodeURI(`./excercises?course=${course}&no=${no}&sub_no=${sub_no}`);
+        const excercise = document.querySelector('#excercises').value;
+        location.href=encodeURI(`./excercises?course=${course}&label=${excercise}`);
       }
       function regist() {
         let url = './excercises_regist';
-        url += `?course=${document.querySelector('#courses').value}`;
-        url += `&no=${document.querySelector('#no').value}`;
-        url += `&sub_no=${document.querySelector('#sub_no').value}`;
+        url += `?label=${document.querySelector('#label').value}`;
+        url += `&course=${document.querySelector('#courses').value}`;
         url += `&category=${document.querySelector('#category').value}`;
         url += `&question=${document.querySelector('#question').value}`;
         url += `&submit=${document.querySelector('#submit').value}`;
-        url += `&allocation=${document.querySelector('#allocation').value}`;
+        url += `&point=${document.querySelector('#point').value}`;
         url += `&weight=${document.querySelector('#weight').value}`;
+        url += `&memo=${document.querySelector('#memo').value}`;
         location.href=encodeURI(url);
       }
       function del() {
         let url = './excercises_del';
-        url += `?course=${document.querySelector('#courses').value}`;
-        url += `&no=${document.querySelector('#no').value}`;
-        url += `&sub_no=${document.querySelector('#sub_no').value}`;
+        url += `?label=${document.querySelector('#label').value}`;
+        url += `&course=${document.querySelector('#courses').value}`;
         location.href=encodeURI(url);
       }
+      function init() {
+        const select1 = document.querySelector('#courses');
+        select1.addEventListener('change',()=>{search();});
+        const select2 = document.querySelector('#excercises');
+        select2.addEventListener('change',()=>{search();});
+        const l = document.querySelector('#label');
+        l.value = select2.value;
+      }
+      window.addEventListener('load',init);
     </script>
   </head>
   <body>
@@ -36,8 +43,8 @@
     <p>Message: <%=msg%></p>
     <p>Course IDs:
       <select id="courses">
-        <option value="">select for search</options>
-        <% for (c of courses) { %>
+        <option value="">select course</options>
+        <% for (const c of courses) { %>
           <% if (c.id===course) { %>
             <option value="<%= c.id %>" selected="true"><%= c.id %></options>
           <% } else { %>
@@ -45,35 +52,25 @@
           <% } %>
         <% } %>
       </select>,
-      No:
-      <select id="no">
-        <% for (let i=1;i<100;i++) { %>
-          <% let ii;if(i<10){ii="0"+i;}else{ii=""+i} %>
-          <% if (ii===no) { %>
-            <option value="<%= ii %>" selected="true"><%= ii %></options>
+      Excercises:
+      <select id="excercises">
+        <option value="">select excercise</options>
+        <% for (const e of excercises) { %>
+          <% if (e.label===label) { %>
+            <option value="<%= e.label %>" selected="true"><%= e.label %></options>
           <% } else { %>
-            <option value="<%= ii %>"><%= ii %></options>
-          <% } %>
-        <% } %>
-      </select>,
-      Sub_no:
-      <select id="sub_no">
-        <% for (let i=1;i<100;i++) { %>
-          <% let ii;if(i<10){ii="0"+i;}else{ii=""+i} %>
-          <% if (ii===sub_no) { %>
-            <option value="<%= ii %>" selected="true"><%= ii %></options>
-          <% } else { %>
-            <option value="<%= ii %>"><%= ii %></options>
+            <option value="<%= e.label %>"><%= e.label %></options>
           <% } %>
         <% } %>
       </select>
-      <button type="button" onclick="search()">Search</button>
     </p>
+    <p>Label: <input type="text" id="label" size="25" value="<%=label%>"/>
     <p>Category: <input type="text" id="category" size="25" value="<%=category%>"/>
     <p>Question URL: <input type="text" id="question" size="25" value="<%=question%>"/>
     <p>Submit URL: <input type="text" id="submit" size="25" value="<%=submit%>"/>
-    <p>Allocation: <input type="text" id="allocation" size="25" value="<%=allocation%>"/>
+    <p>Point: <input type="text" id="point" size="25" value="<%=point%>"/>
     <p>Weight: <input type="text" id="weight" size="25" value="<%=weight%>"/>
+    <p>Memo: <input type="text" id="memo" size="25" value="<%=memo%>"/>
     <p>
       <button type="button" onclick="regist();">Registrate</button>
       <button type="button" onclick="del();">Delete</button>

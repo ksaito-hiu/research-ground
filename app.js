@@ -24,14 +24,8 @@ const express = require('express');
       return 'unknown/';
     }
   };
-  // ファイル提出を検知して処理するための関数
-  // (今はまだなにもさせない)
-  config.files.hook = function(path,uid,utime) {
-    //console.log("GAHA: ファイルが提出されました。");
-    //console.log("path="+path+", uid="+uid+", utime="+utime);
-  };
   
-  const research_ground = await require('./research-ground')(config);
+  const research_ground = await new require('./research-ground')(config);
 
   const app = express();
 

@@ -3,10 +3,114 @@
   <head>
     <meta charset="UTF-8">
     <title>Marking</title>
+    <script>
+      function search() {
+        let url = './marking';
+        url += `?course=${document.querySelector('#courses').value}`;
+        url += `&label=${document.querySelector('#excercises').value}`;
+        url += `&student=${document.querySelector('#students').value}`;
+        location.href=encodeURI(url);
+      }
+      function mark() {
+        let url = './marking_mark';
+        url += `?course=${document.querySelector('#courses').value}`;
+        url += `&label=${document.querySelector('#excercises').value}`;
+        url += `&student=${document.querySelector('#students').value}`;
+        url += `&mark=${document.querySelector('#mark').value}`;
+        url += `&feedback=${document.querySelector('#feedback').value}`;
+        location.href=encodeURI(url);
+      }
+      function pre_student() {
+        const select = document.querySelector('#students');
+        if (select.selectedIndex > 0)
+          select.selectedIndex--;
+        else
+          select.selectedIndex= (select.length - 1);
+        search();
+      }
+      function post_student() {
+        const select = document.querySelector('#students');
+        if (select.selectedIndex < (select.length - 1))
+          select.selectedIndex++;
+        else
+          select.selectedIndex=0;
+        search();
+      }
+      function init() {
+        const select1 = document.querySelector('#courses');
+        select1.addEventListener('change',(e)=>{search();});
+        const select2 = document.querySelector('#excercises');
+        select2.addEventListener('change',(e)=>{search();});
+        const select3 = document.querySelector('#students');
+        select3.addEventListener('change',(e)=>{search();});
+        const question = '<%=question_url%>';
+        const submit = '<%=submit_url%>';
+        if (question)
+          window.open(question,'question');
+        if (submit)
+          window.open(submit,'submit');
+        document.querySelector('#mark').focus();
+      }
+      window.addEventListener('load',init);
+    </script>
   </head>
   <body>
     <h1>Marking</h1>
     <p>Message: <%=msg %></p>
+    <p>Courses:
+      <select id="courses">
+        <option value="">select for course</options>
+        <% for (const c of courses) { %>
+          <% if (c.id===course) { %>
+            <option value="<%= c.id %>" selected="true"><%= c.name %></options>
+          <% } else { %>
+            <option value="<%= c.id %>"><%= c.name %></options>
+          <% } %>
+        <% } %>
+      </select>
+    </p>
+    <p>Excecise:
+      <select id="excercises">
+        <option value="">select for excercise</options>
+        <% for (const e of excercises) { %>
+          <% if (e.label===label) { %>
+            <option value="<%= e.label %>" selected="true"><%= e.label %></options>
+          <% } else { %>
+            <option value="<%= e.label %>"><%= e.label %></options>
+          <% } %>
+        <% } %>
+      </select>
+      問題カテゴリー:<%=excercise.category%>、重み(難易度)<%=excercise.weight%>、
+      <a href="<%=question_url%>" target="question">問題</a>
+    </p>
+    <p>
+      Student:
+      <button type="button" onclick="pre_student()">&lt;前の学生</button>
+      <select id="students">
+        <% for (const s of students) { %>
+          <% if (s.account===student) { %>
+            <option value="<%= s.account %>" selected="true"><%= s.account %></options>
+          <% } else { %>
+            <option value="<%= s.account %>"><%= s.account %></options>
+          <% } %>
+        <% } %>
+      </select>
+      <button type="button" onclick="post_student()">次の学生&gt;</button>
+      <a href="<%=submit_url%>" target="submit">提出課題</a>。
+    </p>
+    <hr/>
+    <p>課題の状態：<%=mark.status%></p>
+    <p>評点:<input id="mark" type="text" size="5" value="<%=mark.mark%>"/>
+      (配点:<%=excercise.point%>点中)</p>
+    <p>フィードバック:</p>
+    <textarea id="feedback"><%=mark.feedback%></textarea>
+    <input type="hidden" id="feedback_bak" value="<%=mark.feedback%>"/>
+    <p>古いフィードバック:</p>
+    <pre id="old_feedback"><%=JSON.stringify(mark.feedbacks,null,2)%></pre>
+    <p>フィードバック例:</p>
+    <pre><%=JSON.stringify(feedbacks,null,2)%></pre>
+    <p><button type="button" onclick="mark()">Mark</button></p>
+    <hr/>
     <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
   </body>
 </html>

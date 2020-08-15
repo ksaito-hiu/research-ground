@@ -68,14 +68,23 @@ research-ground documentation
     + Collection name: actions
         - { type: 'action_type', utime: number_of_unixtime, and more }
 
-でも、ログ大量になりそうなので廃止しようかな。
-整理しなおして以下のようにしようかと思っている。
+あとで検証したいと思うけどMongoDBにはcappedコレクションという
+機能があって、コレクションのデーター容量に制限が付けられる。
+mongoのCUIでは以下のようにすれば作れるらしい。
+
+    db.createCollection('logs', {capped: true, size: 1048576})
+
+上の`size: 1048576`は1MByteの上限設定、maxオプションを使えば
+ドキュメントの個数で上限設定できるらしい。さらにデーターを
+時間で有効期限切れ(TTL)にするインデックスも利用できるらしい。
+整理しなおそう。
 
 * このシステムで扱う科目
     + Collection name: courses
     + 科目ID
         - 「科目CD(大学で決めてるやつ)_クラス」と入力するべし
         - 「`_クラス`」は複数クラス展開している場合区別する文字列
+        - 例「`E1066_ksaito`」
     + 科目名
         - 複数クラス展開してる場合は区別できるようにすると吉。
     + format: `{ id: 'E1066_ksaito', name: 'モバイルアプリ演習(齋藤健司クラス)' }`
@@ -90,35 +99,57 @@ research-ground documentation
 * 履修者アカウント
     + Collection name: students
     + 学生アカウントと科目の情報
+    + 本当は学生の状態も色々管理したいけど、とりあえずやめとく
     + format: `{ account: 's202099999', course: 'E1066_ksaito' }`
 * 課題情報
     + Collection name: excercises
-    + 自動で付けられる課題ID
+    + 自動で付けられるID
+    + ラベル
+        + 半角英数で10文字ぐらいの文字列を推奨。
+          記号は、アンダーバー、ハイフンぐらいに
+          しといて欲しい。
+        + この文字列で辞書順にソートすると自然な
+          順番(出題順など)に並ぶようにすること推奨
+        + 例えば「map01_02」など
     + 何の科目の課題か
-    + 番号(2桁に正規化。何回目の単元かを表すことを意図。)
-    + 副番号(2桁に正規化。単元内の通し番号を意図。)
-    + 課題の出題場所(URL) 問題が掲載されているURL
-    + 課題の提出場所(URL) 学生の提出場所のrootからのpathとファイル名を含むURL
-    + カテゴリ(任意の文字列)
-        - 必須課題:'k'、応用課題:'o'とかを意図。
+    + 課題の出題場所のURL
+    + 課題の提出場所のパス
+        - https://...../research-ground/files/ の後に、
+          classifier関数で計算される学生ごとのパスを連結して、
+          その後に続くパス
+        - 例えば「`/map/01/map01_01.html`」など
     + 配点(最高点数。原則、0:未提出,1:不完全,2:合格、にしたい)
     + 重み(難易度。あった方良いと思う)
-    + format: `{ _id: '???', course: 'E1066_ksaito', no: 1, sub_no: 1, question: 'https://....', submit: 'https://...', category: 'k', allocation: 2, weight: 5 }`
+    + カテゴリ(任意の文字列)
+        - 必須課題、応用課題とかを意図。
+    + メモ(説明とか。本当に任意)
+    + format: `{ _id: '???', label: 'map01_01', course: 'E1066_ksaito', no: '01', sub_no: '01', question: 'https://s314.do-johodai.ac.jp/map/01/map01_01.html', submit: '/map/01/map01_01.html', category: '必須', point: 2, weight: 5, memo:'' }`
 * 評価(採点)の管理(課題と学生の組に対して)
     + Collection name: marks
-    + 自動で付けられる評価ID
+    + 自動で付けられるID
     + 評価対象の課題のID
     + 学生アカウント
-    + 課題の状態(未提出:unsubmitted、提出:submitted、採点済み:marked、再提出:resubmitted)
+    + 課題の状態(未提出:unsubmitted、提出:submitted、採点済み:marked、再提出:resubmitted、削除:remoed)
     + 評価(現在の評価。0以上、配点以下)
-    + フィードバック(コメント)
-    + 過去のフィードバック(消さないで蓄積して残しておきたい)
-    + format: `{ id: '???', excercise: '???', student: 's202099999', status: 'submitted', mark: 2, feedback: '(なし)', old_feedback: '○△□ができていません。'  }`
+    + 過去のフィードバック(コメント)の配列(消さないで蓄積して残しておきたい)
+    + format: `{ _id: '???', excercise: '???', student: 's202099999', status: 'submitted', mark: 2, feedbacks: ['', '○△□ができていません。']  }`
 * フィードバック(コメント)の管理
   (フィードバックの文章を使い回すための物)
     + Collection name: feedbacks
-    + 自動のID
+    + 自動で付けられるID
     + 対象とする課題のID
     + フィードバック(コメント)の文面
-    + format: `{ _id: '???', excercise: '???' , feedback: '○△□ができていません。' }`
+    + 採用回数
+    + format: `{ _id: '???', excercise: '???' , feedback: '○△□ができていません。', count: 2 }`
 
+-----
+
+メモ：今ちらっと調べたら出てきたのでメモ。Mongodbで
+自動で付けられる_idというフィールドはObjectIDというやつで
+文字列ではないらしい。なので検索する時とかは文字列のままでは
+検索できなくて以下のようにしないといけないらしい。
+
+    const ObjectID = require('mongodb').ObjectID;
+    const oid = new ObjectID('507f1f77bcf86cd799439011');
+
+でも、まだ試していない。

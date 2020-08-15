@@ -29,18 +29,12 @@
 
   "comment3": "課題提出機能に関する設定",
   "files": {
-    "root": "/path/to/the/directory/files/",
-    "hook": null
+    "root": "/path/to/the/directory/files/"
   },
 
   "comment4": "管理者(教師)のWebID",
   "admin": [
     "https://somebody1.solid.community/profile/card#me",
     "https://somebody2.solid.community/profile/card#me"
-  ],
-
-  "comment5": "スチューデントアシスタントのWebID",
-  "SA": [
-    "https://accounts.google.com/people/somebody3#me"
   ]
 }

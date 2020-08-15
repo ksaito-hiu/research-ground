@@ -3,10 +3,80 @@
   <head>
     <meta charset="UTF-8">
     <title>Progress</title>
+    <style>
+      .excercise {
+        border-style: solid;
+      }
+    </style>
+    <script>
+      function search() {
+        let url = './progress';
+        url += `?course=${document.querySelector('#courses').value}`;
+        location.href=encodeURI(url);
+      }
+      function init() {
+        const courses = document.querySelector('#courses');
+        courses.addEventListener('change',search);
+      }
+      window.addEventListener('load',init);
+      <%
+      function dirname(str) {
+        return str.substring(0,str.lastIndexOf('/')+1);
+      }
+      function status_jp(str) {
+        if (str==='unsubmitted') return '未提出';
+        if (str==='submitted') return '提出(採点まだ)';
+        if (str==='marked') return '提出(採点済み)';
+        if (str==='resubmitted') return '再提出(採点まだ)';
+        if (str==='removed') return 'ファイル削除';
+        return '謎！？';
+      }
+      %>
+    </script>
   </head>
   <body>
     <h1>Progress</h1>
-    <p>Message: <%=msg %></p>
+    <p>Message: <%=msg%></p>
+    <p>UID: <%=uid%></p>
+    <p>Course:
+      <select id="courses">
+        <option value="">select course</options>
+        <% for (const c of courses) { %>
+          <% if (c.id===course) { %>
+            <option value="<%= c.id %>" selected="true"><%= c.name %></options>
+          <% } else { %>
+            <option value="<%= c.id %>"><%= c.name %></options>
+          <% } %>
+        <% } %>
+      </select>
+    </p>
+    <h2>全体統計</h2>
+    <p>得点<%=total%>(満点は<%=perfect%>点)</p>
+    <p>ここに、学生の状況に応じて色々メッセージ出したいところ。</p>
+    <h2>課題ごとの評価</h2>
+    <% for (const e of excercises) { %>
+    <div class="excercise">
+      <% let m = null;
+         for (const mm of marks)
+           if (e._id.equals(mm.excercise))
+             m = mm;
+      %>
+      <h2><%=e.label%></h2>
+      <% if (m) { %>
+        <p>状態: <%=status_jp(m.status)%></p>
+        <p>点数: <%=m.mark%>/<%=e.point%></p>
+        <pre>feedback: <%=m.feedbacks[m.feedbacks.length-1]%></pre>
+      <% } else { %>
+        <p>状態: 未提出</p>
+        <p>点数: 0/<%=e.point%></p>
+        <pre>feedback: 提出よろしく！</pre></pre>
+      <% } %>
+        <p><a href="<%=e.question%>" target="question">出題ページ</a>:
+           <a href="<%=submit_root%><%=e.submit%>" target="submit">自分の課題</a>:
+           <a href="<%=uploader%><%=dirname(e.submit)%>" target="files">提出場所</a></p>
+    </div>
+    <% } %>
+    <hr/>
     <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
   </body>
 </html>

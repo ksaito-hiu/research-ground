@@ -8,30 +8,23 @@ const router = express.Router();
 /*
  * ルーティング
  */
-const init = async function(config) {
-  let colActions = null;
-
-  // MongoDBのクライアントを受け取ってDBを取得し
-  // actionを記録するためのcollectionを取得。
-  // DB名は'research_ground'の決め打ち
-  router.set_mongo_client = async function(mc) {
-    const db = mc.db('research_ground');
-    colActions = await db.collection('actions');
-  };
+const init = async function(rg) {
+  // 上記引数のrgはresearch-groundのインスタンス。rg.configで設定、
+  // rg.colCoursesなどでMongoDBのcollectionにアクセスできる。
 
   // ファイルアップロードのためのミドルウェア
   // loginCheck,permissionCheckは済んでる前提
   const storage = multer.diskStorage({
     destination: function(req,file,cb) {
       const webid = req.session.webid;
-      const uid = config.identity.webid2id(webid);
-      const dirs = config.identity.classifier(uid);
+      const uid = rg.config.identity.webid2id(webid);
+      const dirs = rg.config.identity.classifier(uid);
       let current_path;
       if (!!req.query.path)
         current_path = path.normalize(req.query.path);
       else
         current_path = '/';
-      const the_path = config.files.root + dirs + uid + current_path;
+      const the_path = rg.config.files.root + dirs + uid + current_path;
       cb(null,the_path);
     },
     filename: function (req,file,cb) {
@@ -46,7 +39,7 @@ const init = async function(config) {
   // loginCheck,permissionCheckは済んでる前提
   const storageREST = multer.diskStorage({
     destination: function(req,file,cb) {
-      const the_path = path.join(config.files.root,req.path);
+      const the_path = path.join(rg.config.files.root,req.path);
       const p_path = path.dirname(the_path);
       cb(null,p_path);
     },
@@ -63,7 +56,7 @@ const init = async function(config) {
   // 後に置かれておりreq.session.uidとかが使える前提で
   // 書かれている
   const dirIndex = async function(req,res,next) {
-    const the_path = config.files.root + req.path;
+    const the_path = rg.config.files.root + req.path;
     const stats = await stat(the_path);
     if (!!stats && stats.isDirectory()) {
       if (req.accepts('json')==='json') {
@@ -74,7 +67,7 @@ const init = async function(config) {
         if (the_path.endsWith('/')) {
           const files = await readdir(the_path);
           files.unshift(parentDir);
-          let c_path = path.join(config.server.mount_path,'/files/',req.path);
+          let c_path = path.join(rg.config.server.mount_path,'/files/',req.path);
           res.render('files/dir_index',{c_path,files});
           return;
         } else {
@@ -86,7 +79,7 @@ const init = async function(config) {
     }
     next();
   };
-  const staticRouter = express.static(config.files.root);
+  const staticRouter = express.static(rg.config.files.root);
   const parentDir = {
     name: '..',
     isDirectory: function() { return true; }
@@ -180,12 +173,12 @@ const init = async function(config) {
     if (!!req.session && !!req.session.webid)
       webid = req.session.webid;
     if (!webid) {
-      const loginURL = config.server.mount_path+'/auth/login?return_path='+config.server.mount_path+req.originalUrl;
+      const loginURL = rg.config.server.mount_path+'/auth/login?return_path='+rg.config.server.mount_path+req.originalUrl;
       res.redirect(loginURL);
       return;
     }
     // WebIDからuidを切り出してセッションに保存
-    const uid = config.identity.webid2id(webid);
+    const uid = rg.config.identity.webid2id(webid);
     req.session.uid = uid;
     next();
   }
@@ -195,21 +188,21 @@ const init = async function(config) {
   // のでreq.session.webidにwebidが入っていて、
   // req.session.uidにuidが入っている前提で処理している。
   function permissionCheck(req,res,next) {
-    if (config.admin.includes(req.session.webid)) { // 管理者はOK
+    if (rg.config.admin.includes(req.session.webid)) { // 管理者はOK
       next();
       return;
     }
-    if (config.SA.includes(req.session.webid)) { // SAもOK
+    if (rg.config.SA.includes(req.session.webid)) { // SAもOK
       next();
       return;
     }
     const uid = req.session.uid;
-    const the_dir = '/'+config.identity.classifier(uid)+uid;
+    const the_dir = '/'+rg.config.identity.classifier(uid)+uid;
 //console.log("GAHA: req.path="+req.path);
 //console.log("GAHA: the_dir ="+the_dir);
     if (!req.path.startsWith(the_dir)) {
       const msg = 'You do not have permission.';
-      const baseUrl = config.server.mount_path;
+      const baseUrl = rg.config.server.mount_path;
       res.status(403).render('error.ejs',{msg,baseUrl});
       return;
     }
@@ -224,22 +217,17 @@ const init = async function(config) {
       current_path = path.normalize(req.query.path);
     else
       current_path = '/';
-    const the_path = config.files.root+config.identity.classifier(uid)+uid+current_path;
+    const the_path = rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path;
     const files = await readdir(the_path);
     files.unshift(parentDir);
-    const baseUrl = config.server.mount_path+'/files';
+    const baseUrl = rg.config.server.mount_path+'/files';
     let msg = 'uploaded files are .......';
-    const actions = [];
-    const utime = new Date().getTime();
     for (f of req.files) {
       msg += f.originalname + ",";
-      const file_path = uid+current_path+f.originalname;
-      actions.push({type:'upload',utime,"path":file_path});
-      if (!!config.files.hook)
-        config.files.hook(current_path+f.originalname,uid,utime);
+      const file_path = current_path+f.originalname;
+      rg.observer(uid,'file_upload',{'path':file_path});
     }
-    await colActions.insertMany(actions);
-    const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;
+    const user_dir = baseUrl+'/'+rg.config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
@@ -262,18 +250,18 @@ const init = async function(config) {
     let msg = 'mkdir: ';
     try {
       const dir = req.query.dir;
-      const the_path = config.files.root+config.identity.classifier(uid)+uid+current_path+dir;
+      const the_path = rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path+dir;
       msg += await makeDir(the_path);
       const utime = new Date().getTime();
       const dirPath = uid+current_path+dir;
-      await colActions.insertOne({type:'mkdir',utime,"path":dirPath});
+      await rg.colActions.insertOne({type:'mkdir',utime,"path":dirPath});
     } catch (err) {
       msg += err;
     }
-    const files = await readdir(config.files.root+config.identity.classifier(uid)+uid+current_path);
+    const files = await readdir(rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path);
     files.unshift(parentDir);
-    const baseUrl = config.server.mount_path+'/files';
-    const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;
+    const baseUrl = rg.config.server.mount_path+'/files';
+    const user_dir = baseUrl+'/'+rg.config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
@@ -293,7 +281,7 @@ const init = async function(config) {
       current_path = path.normalize(req.query.path);
     else
       current_path = '/';
-    let files = await readdir(config.files.root+config.identity.classifier(uid)+uid+current_path);
+    let files = await readdir(rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path);
     files.unshift(parentDir);
     let rments;
     if (Array.isArray(req.query.rment))
@@ -307,12 +295,12 @@ const init = async function(config) {
       for (f of files) {
         if (rment === f.name) {
           if (f.isDirectory()) {
-            const dir = config.files.root+config.identity.classifier(uid)+uid+current_path+rment;
+            const dir = rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path+rment;
             ps.push(removeDir(dir));
             const dirPath = uid+current_path+rment;
             actions.push({type:'rmdir',utime,"path":dirPath});
           } else {
-            const rmFile = config.files.root+config.identity.classifier(uid)+uid+current_path+rment;
+            const rmFile = rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path+rment;
             ps.push(removeFile(rmFile));
             const rmFilePath = uid+current_path+rment;
             actions.push({type:'rm',utime,"path":rmFilePath});
@@ -321,7 +309,7 @@ const init = async function(config) {
         }
       }
     }
-    await colActions.insertMany(actions);
+    await rg.colActions.insertMany(actions);
     let msg;
     try {
       ps = await Promise.all(ps);
@@ -333,10 +321,10 @@ const init = async function(config) {
       console.log(e);
       msg = 'some error was occured. '+e.toString();
     }
-    files = await readdir(config.files.root+config.identity.classifier(uid)+uid+current_path);
+    files = await readdir(rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path);
     files.unshift(parentDir);
-    const baseUrl = config.server.mount_path+'/files';
-    const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;
+    const baseUrl = rg.config.server.mount_path+'/files';
+    const user_dir = baseUrl+'/'+rg.config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
@@ -356,11 +344,11 @@ const init = async function(config) {
       current_path = path.normalize(req.query.path);
     else
       current_path = '/';
-    const the_path = config.files.root + config.identity.classifier(uid) + uid + current_path
+    const the_path = rg.config.files.root + rg.config.identity.classifier(uid) + uid + current_path
     const files = await readdir(the_path);
     files.unshift(parentDir);
-    const baseUrl = config.server.mount_path+'/files';
-    const user_dir = baseUrl+'/'+config.identity.classifier(uid)+uid;
+    const baseUrl = rg.config.server.mount_path+'/files';
+    const user_dir = baseUrl+'/'+rg.config.identity.classifier(uid)+uid;
     const data = {
       msg: 'files module!',
       webid,
@@ -384,18 +372,18 @@ const init = async function(config) {
     const webid = req.session.webid;
     const uid = req.session.uid;
     try {
-      const r_path = path.join(config.files.root,req.path);
+      const r_path = path.join(rg.config.files.root,req.path);
       const d_path = path.dirname(r_path);
       let stats = await stat(d_path);
       if (!!stats && stats.isDirectory()) {
-        //const utime = new Date().getTime();
         if (r_path.endsWith('/')) {
           await makeDir(r_path);
-          //await colActions.insertOne({type:'mkdir',utime,"path":dirPath});
+          //rg.observer(uid,'make_dir',{dirPath});
           res.json({ok: true});
         } else {
           //req.fileがアップされたファイルの情報
-          //await colActions.insertOne({type:'upload',utime,"path":dirPath});
+          const p = req.path.substring(rg.config.identity.classifier(uid).length());
+          rg.observer(uid,'file_upload',{'path':p});
           res.json({ok: true});
         }
       } else {
@@ -413,7 +401,7 @@ const init = async function(config) {
     const webid = req.session.webid;
     const uid = req.session.uid;
     try {
-      const r_path = config.files.root+req.path;
+      const r_path = rg.config.files.root+req.path;
       const stats = await stat(r_path);
       if (!!stats && stats.isDirectory()) {
         await removeDir(r_path);
@@ -432,7 +420,7 @@ const init = async function(config) {
   // のデイレクトリが存在するかどうかチェックし、無かったら
   // 作成する。
   router.checkDir = async function(uid) {
-    const the_path = config.files.root + config.identity.classifier(uid) + uid;
+    const the_path = rg.config.files.root + rg.config.identity.classifier(uid) + uid;
     const stats = await stat(the_path);
     if (stats===null) {
       await makeDirR(the_path);

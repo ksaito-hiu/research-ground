@@ -3,37 +3,23 @@ const { Issuer, generators } = require('openid-client');
 
 const router = express.Router();
 
-const init = async function(config) {
-  let colActions = null;
-  let files_app = null;
-
-  // MongoDBのクライアントを受け取ってDBを取得し
-  // actionを記録するためのcollectionを取得。
-  // DB名は'research_ground'の決め打ち
-  router.set_mongo_client = async function(mc) {
-    const db = mc.db('research_ground');
-    colActions = await db.collection('actions');
-  };
-
-  // files_appを受け取って保存する。
-  // 提出場所のチェックをするため。
-  router.set_files_app = async function(fa) {
-    files_app = fa;
-  };
+const init = async function(rg) {
+  // 上記引数のrgはresearch-groundのインスタンス。rg.configで設定、
+  // rg.colCoursesなどでMongoDBのcollectionにアクセスできる。
 
   let tryCount = 0;
   let client = null;
   const initClient = async function() {
     try {
-      const issuer = await Issuer.discover(config.auth.issuer);
+      const issuer = await Issuer.discover(rg.config.auth.issuer);
       client = new issuer.Client({
-        client_id: config.auth.client_id,
-        client_secret: config.auth.client_secret,
-        redirect_uris: config.auth.redirect_uris,
+        client_id: rg.config.auth.client_id,
+        client_secret: rg.config.auth.client_secret,
+        redirect_uris: rg.config.auth.redirect_uris,
         response_types: ['code'],
       });
     } catch(err) {
-      console.log(`Cannot search openid-op at ${config.auth.issuer}. (tryCount=${tryCount})`);
+      console.log(`Cannot search openid-op at ${rg.config.auth.issuer}. (tryCount=${tryCount})`);
       tryCount++;
       let t = 1000*tryCount*tryCount;
       t = t>10*60*1000?10*60*1000:t;
@@ -61,42 +47,49 @@ const init = async function(config) {
     var params = client.callbackParams(req);
     var code_verifier = req.session.local_code_verifier;
     try {
-      const tokenSet = await client.callback(config.auth.redirect_uris[0], params, { code_verifier });
+      const tokenSet = await client.callback(rg.config.auth.redirect_uris[0], params, { code_verifier });
       req.session.id_tokenX = tokenSet.id_token;
       const webid = tokenSet.claims().sub;
-      const uid = config.identity.webid2id(webid);
+      const uid = rg.config.identity.webid2id(webid);
       if (!uid) {
         const msg = 'You do not have permission to login this server.';
-        const baseUrl = config.server.mount_path;
+        const baseUrl = rg.config.server.mount_path;
         res.render('error.ejs',{msg, baseUrl});
         return;
       }
-      let admin,sa;
-      if (config.admin.includes(webid)) admin=true; else admin=false;
-      if (config.SA.includes(webid)) sa=true; else sa=false;
+      let admin,teacher,sa;
+      if (rg.config.admin.includes(webid)) admin=true; else admin=false;
+      let r = await rg.colTeachers.findOne({account:uid});
+      if (r) teacher=true; else teacher=false;
+      r = await rg.colAssistants.findOne({account:uid});
+      if (r) sa=true; else sa=false;
       req.session.webid = webid;
       req.session.uid = uid;
-      res.cookie('webid', webid, {maxAge: config.server.session.maxAge });
-      res.cookie('uid', uid, {maxAge: config.server.session.maxAge });
-      res.cookie('admin', admin, {maxAge: config.server.session.maxAge });
-      res.cookie('sa', sa, {maxAge: config.server.session.maxAge });
+      req.session.admin = admin
+      req.session.teacher = teacher;
+      req.session.sa = sa;
+      res.cookie('webid', webid, {maxAge: rg.config.server.session.maxAge });
+      res.cookie('uid', uid, {maxAge: rg.config.server.session.maxAge });
+      res.cookie('admin', admin, {maxAge: rg.config.server.session.maxAge });
+      res.cookie('teacher', teacher, {maxAge: rg.config.server.session.maxAge });
+      res.cookie('sa', sa, {maxAge: rg.config.server.session.maxAge });
       const utime = new Date().getTime();
-      await colActions.insertOne({type:'login',utime,"uid":uid});
+      await rg.colActions.insertOne({type:'login',utime,"uid":uid});
 
       // ログインが成功したらファイルの提出場所が存在するかチェックして
       // 無ければ作成する。
-      await files_app.checkDir(uid);
+      await rg.files_app.checkDir(uid);
       
       let ret = req.session.return_path;
       if (!ret) {
-        ret = config.server.mount_path;
+        ret = rg.config.server.mount_path;
         if (!ret.endsWith('/'))
           ret += '/';
       }
       res.render('auth/loggedin.ejs',{webid,ret});
     } catch(err) {
-      const msg = JSON.stringify(err);
-      const baseUrl = config.server.mount_path;
+      const msg = err.toString();
+      const baseUrl = rg.config.server.mount_path;
       res.render('error.ejs',{msg, baseUrl});
     }
   });
@@ -105,7 +98,7 @@ const init = async function(config) {
     let params;
     if (req.session.id_tokenX != undefined) {
       params = {
-        post_logout_redirect_uri: config.auth.post_logout_redirect_uri,
+        post_logout_redirect_uri: rg.config.auth.post_logout_redirect_uri,
         id_token_hint: req.session.id_tokenX,
       };
     } else {
@@ -127,7 +120,7 @@ const init = async function(config) {
     } else {
       msg = 'You are not logged in.';
     }
-    const baseUrl = config.server.mount_path;
+    const baseUrl = rg.config.server.mount_path;
     res.render('auth/auth.ejs',{msg,baseUrl});
   });
 

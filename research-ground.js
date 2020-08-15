@@ -14,7 +14,17 @@ const cookieParser = require('cookie-parser');
 const { MongoClient } = require('mongodb');
 const i18n = require('i18n');
 
-const init = async function(config) {
+// このモジュールの使い方は
+// ...
+// const config = require('./config.json');
+// const research_ground = await new require('./research-ground')(config);
+// const app = express();
+// app.use('/',research_ground);
+// ...
+// という感じでやります
+const init = async function(config_obj) {
+  this.config = config_obj;
+
   // idをWebIDに変換する関数が設定されてなければ以下の
   // 関数で処理する。(かなり適当)
   if (!config.identity.id2webid) {
@@ -40,33 +50,30 @@ const init = async function(config) {
       return '/';
     };
   }
-  // ファイル提出を検知して処理するための関数
-  if (!config.files.hook) {
-    config.files.hook = function(path,uid,utime) {
-      // do nothing.
-    };
-  }
 
-  const files_app = await require('./files_app')(config);
-  const auth = await require('./auth')(config);
-  auth.set_files_app(files_app);
-  const admin = await require('./admin')(config);
-  const marking = await require('./marking')(config);
-  const progress = await require('./progress')(config);
-
-  // MongoDBのクライアントを初期化
+  // MongoDBのクライアントを初期化しDBを取得し
+  // 各種collectionを用意。DB名は'research_ground'の決め打ち
   const mongo_client = new MongoClient('mongodb://127.0.0.1:27017',{
     useNewUrlParser: true,
     useUnifiedTopology: true
   });
   await mongo_client.connect();
+  const db = mongo_client.db('research_ground');
+  this.colActions = await db.collection('actions');
+  this.colCourses = await db.collection('courses');
+  this.colTeachers = await db.collection('teachers');
+  this.colAssistants = await db.collection('assistants');
+  this.colStudents = await db.collection('students');
+  this.colExcercises = await db.collection('excercises');
+  this.colMarks = await db.collection('marks');
+  this.colFeedbacks = await db.collection('feedbacks');
 
-  // 上で初期化したMongoDBのクライアントを使い回す
-  await files_app.set_mongo_client(mongo_client);
-  await auth.set_mongo_client(mongo_client);
-  await admin.set_mongo_client(mongo_client);
-  await marking.set_mongo_client(mongo_client);
-  await progress.set_mongo_client(mongo_client);
+  this.observer = await require('./observer')(this);
+  this.files_app = await require('./files_app')(this);
+  this.auth = await require('./auth')(this);
+  this.admin = await require('./admin')(this);
+  this.marking = await require('./marking')(this);
+  this.progress = await require('./progress')(this);
 
   const app = express();
 
@@ -91,15 +98,15 @@ const init = async function(config) {
   app.use(cookieParser());
   app.use(express.static(path.join(__dirname, 'public')));
 
-  app.use('/auth',auth);
+  app.use('/auth',this.auth);
 
-  app.use('/files',files_app);
+  app.use('/files',this.files_app);
 
-  app.use('/admin',admin);
+  app.use('/admin',this.admin);
 
-  app.use('/marking',marking);
+  app.use('/marking',this.marking);
 
-  app.use('/progress',progress);
+  app.use('/progress',this.progress);
 
   app.get('/', (req, res) => {
     let str;
