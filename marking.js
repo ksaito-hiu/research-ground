@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const mongo = require('mongodb');
 
 const router = express.Router();
 
@@ -137,6 +138,7 @@ const init = async function(rg) {
     if (label) { // 採点対象の指定がある場合
       o.excercise = await rg.colExcercises.findOne({course,label});
       o.question_url = o.excercise.question;
+//if (true) {o.question_url='';console.log('debug GAHA');} // デバッグ時に上の行のかわりに有効にすると楽
       o.submit_url = rg.config.server.mount_path+ '/files/' + rg.config.identity.classifier(student) + student + o.excercise.submit;
       if (o.excercise) { // 採点対象がちゃんと存在する場合
         o.feedbacks = await rg.colFeedbacks.find({excercise:o.excercise._id}).sort({cout:-1}).toArray();
@@ -208,11 +210,89 @@ const init = async function(rg) {
     o.label=label; o.course=course; o.student = student;
     o.mark = mark_data;
     o.question_url = o.submit_url = "";
-    o.feedbacks = [];
+    o.feedbacks = await rg.colFeedbacks.find({}).sort({count:-1}).toArray();
     o.msg = `Marked!(${course},${label},${student})`;
     res.render('marking/marking',o);
   });
   router.get('/feedback_reserve',loginCheck,async (req,res)=>{
+    const uid = req.session.uid;
+    const excercise_id = req.query.excercise_id;
+    const feedback = req.query.feedback;
+    const e = await colExcercises.findOne({_id: new mongo.ObjectID(excercise_id)});
+    const course = e.course;
+    // コースの情報無しの状態でも権限が無いと判断できる場合の応答
+    if (!course && !isAdmin(uid) && !isTeacher(uid,null) && !isAssistant(uid,null)) {
+      res.json({result:'error'});
+      return;
+    }
+    // コースの情報を含めて権限が無い場合の応答
+    if (!isAdmin(uid) && !isTeacher(uid,course) && !isAssistant(uid,course)) {
+      res.json({result:'error'});
+      return;
+    }
+    const eid = new mongo.ObjectID(excercise_id);
+    const data = {excercise:eid,feedback,count:1};
+    const ret = await rg.colFeedbacks.insertOne(data);
+    if (ret.insertedCount===1) {
+      res.json({result:'ok',feedback_id:ret.insertedId,feedback});
+      return;
+    } else {
+      res.json({result:'error'});
+      return;
+    }
+  });
+  router.get('/feedback_del',loginCheck,async (req,res)=>{
+    const uid = req.session.uid;
+    const feedback_id = req.query.feedback_id;
+    const fid = new mongo.ObjectID(feedback_id);
+    const f = await colFeedbacks.findOne({_id: fid});
+    const e = await colExcercises.findOne({_id:f.excercise});
+    const course = e?e.course:'';
+    // コースの情報無しの状態でも権限が無いと判断できる場合の応答
+    if (!course && !isAdmin(uid) && !isTeacher(uid,null) && !isAssistant(uid,null)) {
+      res.json({result:'error'});
+      return;
+    }
+    // コースの情報を含めて権限が無い場合の応答
+    if (!isAdmin(uid) && !isTeacher(uid,course) && !isAssistant(uid,course)) {
+      res.json({result:'error'});
+      return;
+    }
+    const ret = await rg.colFeedbacks.deleteOne({_id:fid});
+    if (ret.deletedCount===1) {
+      res.json({result:'ok'});
+      return;
+    } else {
+      res.json({result:'error'});
+      return;
+    }
+  });
+  router.get('/feedback_countup',loginCheck,async (req,res)=>{
+    const uid = req.session.uid;
+    const feedback_id = req.query.feedback_id;
+    const f = await colFeedbacks.findOne({_id: new mongo.ObjectID(feedback_id)});
+    const e = await colExcercises.findOne({_id:f.excercises});
+    const course = e.course;
+    // コースの情報無しの状態でも権限が無いと判断できる場合の応答
+    if (!course && !isAdmin(uid) && !isTeacher(uid,null) && !isAssistant(uid,null)) {
+      res.json({result:'error'});
+      return;
+    }
+    // コースの情報を含めて権限が無い場合の応答
+    if (!isAdmin(uid) && !isTeacher(uid,course) && !isAssistant(uid,course)) {
+      res.json({result:'error'});
+      return;
+    }
+    const fid = new mongo.ObjectID(feedback_id);
+    const ret = await rg.colFeedbacks.update({_id:fid},{$inc: {count: 1}});
+console.log("GAHA: "+JSON.stringify(ret,null,2));
+    if (ret.insertedCount===1) {
+      res.json({result:'ok'});
+      return;
+    } else {
+      res.json({result:'error'});
+      return;
+    }
   });
 
 
