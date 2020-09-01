@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <%- include("../include/_head", {title: "Auth"}) %>
   </head>
   <body>
     <h1>Auth</h1>
@@ -11,14 +11,14 @@
       みて下さい。
     </p>
     <ul>
-      <li><a href="https://accounts.google.com/Logout" target="_blank">全てのGoogleアカウントをログアウト</a></li>
-      <li><a href="https://accounts.yahoo.co.jp/profile" target="_blank">Yahoo! JAPANの登録情報ページでログアウト</a></li>
+      <li><a class="btn wave-effect wave-light" href="https://accounts.google.com/Logout" target="_blank">全てのGoogleアカウントをログアウト</a></li>
+      <li><a class="btn wave-effect wave-light" href="https://accounts.yahoo.co.jp/profile" target="_blank">Yahoo! JAPANの登録情報ページでログアウト</a></li>
     </ul>
     <hr/>
     <ul>
-      <li><a href="<%=baseUrl %>/auth/login">ログイン</a></li>
-      <li><a href="<%=baseUrl %>/auth/logout">ログアウト</a></li>
+      <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/auth/login">ログイン</a></li>
+      <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/auth/logout">ログアウト</a></li>
     </ul>
-    <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
+    <p><a class="btn wave-effect wave-light" href="<%=baseUrl %>/">Back to research-ground top.</a></p>
   </body>
 </html>
