@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
+    <%- include("../include/_head", {title: "Logged In"}) %>
   </head>
   <body>
     <h1>Logged In</h1>
     <p>WebID: <%=webid %></p>
-    <p><a href="<%=ret %>">Back</a></p>
+    <p><a class="btn wave-effect wave-light" class="btn wave-effect wave-light" href="<%=ret %>">Back</a></p>
   </body>
 </html>
