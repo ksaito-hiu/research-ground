@@ -5,17 +5,20 @@
   </head>
   <body>
     <%- include("../include/_header") %>
-    <main>
-      <h1>Index of <%=c_path%></h1>
-      <ul>
-        <% files.forEach(function(file) { %>
-          <% if (file.isDirectory()) { %>
-            <li><a href="./<%=(file.name+'/') %>"><%=file.name %></a></li>
-          <% } else { %>
-            <li><a href="./<%=file.name%>"><%=file.name %></a></li>
-          <% } %>
-        <% }); %>
-      </ul>
-    </main>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Index of <%=c_path%></h1>
+        <ul>
+          <% files.forEach(function(file) { %>
+            <% if (file.isDirectory()) { %>
+              <li><a href="./<%=(file.name+'/') %>"><%=file.name %></a></li>
+            <% } else { %>
+              <li><a href="./<%=file.name%>"><%=file.name %></a></li>
+            <% } %>
+          <% }); %>
+        </ul>
+      </main>
+    </div>
   </body>
 </html>

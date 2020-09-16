@@ -5,10 +5,13 @@
   </head>
   <body>
     <%- include("include/_header") %>
-    <main>
-      <h1>an error page</h1>
-      <p>Message: <%=msg %></p>
-      <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
-    </main>
+    <div class="main-wrapper">
+    <%- include("include/_nav_main.ejs") %>
+      <main>
+        <h1>an error page</h1>
+        <p>Message: <%=msg %></p>
+        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+      </main>
+    </div>
   </body>
 </html>

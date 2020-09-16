@@ -5,23 +5,26 @@
   </head>
   <body>
     <%- include("../include/_header") %>
-    <main>
-      <h1>Auth</h1>
-      <p>Message: <%=msg %></p>
-      <p>ログインが上手くいかない時で、複数のGoogleアカウントやYahoo! JAPAN IDで
-        ログインしているような場合は一度全てのアカウントでログアウトしてから試して
-        みて下さい。
-      </p>
-      <ul>
-        <li><a class="btn wave-effect wave-light" href="https://accounts.google.com/Logout" target="_blank">全てのGoogleアカウントをログアウト</a></li>
-        <li><a class="btn wave-effect wave-light" href="https://accounts.yahoo.co.jp/profile" target="_blank">Yahoo! JAPANの登録情報ページでログアウト</a></li>
-      </ul>
-      <hr/>
-      <ul>
-        <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/auth/login">ログイン</a></li>
-        <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/auth/logout">ログアウト</a></li>
-      </ul>
-      <p><a class="btn wave-effect wave-light" href="<%=baseUrl %>/">Back to research-ground top.</a></p>
-    </main>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Auth</h1>
+        <p>Message: <%=msg %></p>
+        <p>ログインが上手くいかない時で、複数のGoogleアカウントやYahoo! JAPAN IDで
+          ログインしているような場合は一度全てのアカウントでログアウトしてから試して
+          みて下さい。
+        </p>
+        <ul>
+          <li><a class="btn wave-effect wave-light" href="https://accounts.google.com/Logout" target="_blank">全てのGoogleアカウントをログアウト</a></li>
+          <li><a class="btn wave-effect wave-light" href="https://accounts.yahoo.co.jp/profile" target="_blank">Yahoo! JAPANの登録情報ページでログアウト</a></li>
+        </ul>
+        <hr/>
+        <ul>
+          <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/auth/login">ログイン</a></li>
+          <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/auth/logout">ログアウト</a></li>
+        </ul>
+        <p><a class="btn wave-effect wave-light" href="<%=baseUrl %>/">Back to research-ground top.</a></p>
+      </main>
+    </div>
   </body>
 </html>

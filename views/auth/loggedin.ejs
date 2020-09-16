@@ -5,10 +5,13 @@
   </head>
   <body>
     <%- include("../include/_header") %>
-    <main>
-      <h1>Logged In</h1>
-      <p>WebID: <%=webid %></p>
-      <p><a class="btn wave-effect wave-light" class="btn wave-effect wave-light" href="<%=ret %>">Back</a></p>
-    </main>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Logged In</h1>
+        <p>WebID: <%=webid %></p>
+        <p><a class="btn wave-effect wave-light" class="btn wave-effect wave-light" href="<%=ret %>">Back</a></p>
+      </main>
+    </div>
   </body>
 </html>

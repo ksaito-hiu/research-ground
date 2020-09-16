@@ -5,13 +5,16 @@
   </head>
   <body>
     <%- include("../include/_header") %>
-    <main>
-      <h1>Progress top</h1>
-      <p>Message: <%=msg %></p>
-      <ul>
-        <li><a href="<%=baseUrl %>/progress/progress">進捗</a></li>
-      </ul>
-      <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
-    </main>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Progress top</h1>
+        <p>Message: <%=msg %></p>
+        <ul>
+          <li><a href="<%=baseUrl %>/progress/progress">進捗</a></li>
+        </ul>
+        <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
+      </main>
+    </div>
   </body>
 </html>

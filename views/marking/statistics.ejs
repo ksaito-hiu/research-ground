@@ -32,68 +32,71 @@
   </head>
   <body>
     <%- include("../include/_header") %>
-    <main>
-      <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
-      <hr/>
-      <h1>Statistics</h1>
-      <p>Message: <%=msg%></p>
-      <p>Course:
-        <select id="courses">
-          <option value="">select course</options>
-          <% for (const c of courses) { %>
-            <% if (c.id===course) { %>
-              <option value="<%= c.id %>" selected="true"><%= c.name %></options>
-            <% } else { %>
-              <option value="<%= c.id %>"><%= c.name %></options>
-            <% } %>
-          <% } %>
-        </select>
-      </p>
-      <h2>全体の統計</h2>
-      <p>ここに、気の利いた統計情報表示させたい。</p>
-      <h2>個別の評価</h2>
-      <p>セルの中身は課題の「状態」「評点」「フィードバック」「提出課題へのリンク」「採点ページへのリンク」です。状態は、未:未提出、提:提出、済:評点済み、再:再提出、削:ファイル削除、謎:？？？があり、「FB」をクリックするとFeedback(コメント)が見れます。テーブルヘッダーの課題名をクリックすると課題の出題ページが開きます。</p>
-      <table>
-        <thead>
-          <tr>
-            <th></th>
-            <% for (const e of excercises) { %>
-            <th><a href="<%=e.question%>" target="question"><%=e.label%></a></th>
-            <% } %>
-          </tr>
-        </thead>
-        <tbody>
-          <% for (const s of students) { %>
-          <tr>
-            <td>
-              <%=s.account%>
-            </td>
-            <% for (const e of excercises) { %>
-            <td>
-              <% let m = null;
-                for (const mm of marks[e.label])
-                  if (e._id.equals(mm.excercise) && s.account===mm.student)
-                    m = mm;
-              %>
-              <% if (m) { %>
-              <span><%-status_jp(m.status)%>:<%=m.mark%>/<%=e.point%></span>
-              <span onclick="alert('<%=m.feedbacks[m.feedbacks.length-1]%>')">FB</span>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <hr/>
+        <h1>Statistics</h1>
+        <p>Message: <%=msg%></p>
+        <p>Course:
+          <select id="courses">
+            <option value="">select course</options>
+            <% for (const c of courses) { %>
+              <% if (c.id===course) { %>
+                <option value="<%= c.id %>" selected="true"><%= c.name %></options>
               <% } else { %>
-              <span>未:0/<%=e.point%></span>
-              <span onclick="alert('提出よろしく！')">FB</span>
+                <option value="<%= c.id %>"><%= c.name %></options>
               <% } %>
-              <span>
-                <a href="<%=submit_root+classifier(s.account)+s.account+e.submit%>" target="submit">課題</a>:
-                <a href="<%=marking_url+'?course='+course+'&label='+e.label+'&student='+s.account%>" target="mark">採点</a>
-              </span>
-            </td>
-          <% } %>
-          </tr>
-          <% } %>
-        </tbody>
-      </table>
-      <hr/>
-      <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
-    </main>
+            <% } %>
+          </select>
+        </p>
+        <h2>全体の統計</h2>
+        <p>ここに、気の利いた統計情報表示させたい。</p>
+        <h2>個別の評価</h2>
+        <p>セルの中身は課題の「状態」「評点」「フィードバック」「提出課題へのリンク」「採点ページへのリンク」です。状態は、未:未提出、提:提出、済:評点済み、再:再提出、削:ファイル削除、謎:？？？があり、「FB」をクリックするとFeedback(コメント)が見れます。テーブルヘッダーの課題名をクリックすると課題の出題ページが開きます。</p>
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <% for (const e of excercises) { %>
+              <th><a href="<%=e.question%>" target="question"><%=e.label%></a></th>
+              <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% for (const s of students) { %>
+            <tr>
+              <td>
+                <%=s.account%>
+              </td>
+              <% for (const e of excercises) { %>
+              <td>
+                <% let m = null;
+                  for (const mm of marks[e.label])
+                    if (e._id.equals(mm.excercise) && s.account===mm.student)
+                      m = mm;
+                %>
+                <% if (m) { %>
+                <span><%-status_jp(m.status)%>:<%=m.mark%>/<%=e.point%></span>
+                <span onclick="alert('<%=m.feedbacks[m.feedbacks.length-1]%>')">FB</span>
+                <% } else { %>
+                <span>未:0/<%=e.point%></span>
+                <span onclick="alert('提出よろしく！')">FB</span>
+                <% } %>
+                <span>
+                  <a href="<%=submit_root+classifier(s.account)+s.account+e.submit%>" target="submit">課題</a>:
+                  <a href="<%=marking_url+'?course='+course+'&label='+e.label+'&student='+s.account%>" target="mark">採点</a>
+                </span>
+              </td>
+            <% } %>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
+        <hr/>
+        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+      </main>
+    </div>
   </body>
 </html>
