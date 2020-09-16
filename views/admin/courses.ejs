@@ -30,21 +30,23 @@
   </head>
   <body>
     <%- include("../include/_header") %>
-    <h1>Management of Courses</h1>
-    <p>Message: <%=msg%></p>
-    <p>Registered course IDs:
-      <select id="courses">
-        <option value="" selected="true">select for search</options>
-        <% for (c of courses) { %>
-        <option value="<%= c.id %>"><%= c.id %></options>
-        <% } %>
-      </select></p>
-    <p>Course ID: <input type="text" id="id" value="<%=id%>"/></p>
-    <p>Course Name: <input type="text" id="name" size="25" value="<%=name%>"/></p>
-    <p>
-      <button type="button" onclick="regist();">Registrate</button>
-      <button type="button" onclick="del();">Delete</button>
-    </p>
-    <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+    <main>
+      <h1>Management of Courses</h1>
+      <p>Message: <%=msg%></p>
+      <p>Registered course IDs:
+        <select id="courses">
+          <option value="" selected="true">select for search</options>
+          <% for (c of courses) { %>
+          <option value="<%= c.id %>"><%= c.id %></options>
+          <% } %>
+        </select></p>
+      <p>Course ID: <input type="text" id="id" value="<%=id%>"/></p>
+      <p>Course Name: <input type="text" id="name" size="25" value="<%=name%>"/></p>
+      <p>
+        <button type="button" onclick="regist();">Registrate</button>
+        <button type="button" onclick="del();">Delete</button>
+      </p>
+      <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+    </main>
   </body>
 </html>

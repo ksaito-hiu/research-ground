@@ -163,94 +163,96 @@
   </head>
   <body>
     <%- include("../include/_header") %>
-    <h1>Marking</h1>
-    <p>Message: <%=msg %></p>
-    <p>Courses:
-      <select id="courses">
-        <option value="">select for course</options>
-        <% for (const c of courses) { %>
-          <% if (c.id===course) { %>
-            <option value="<%= c.id %>" selected="true"><%= c.name %></options>
-          <% } else { %>
-            <option value="<%= c.id %>"><%= c.name %></options>
+    <main>
+      <h1>Marking</h1>
+      <p>Message: <%=msg %></p>
+      <p>Courses:
+        <select id="courses">
+          <option value="">select for course</options>
+          <% for (const c of courses) { %>
+            <% if (c.id===course) { %>
+              <option value="<%= c.id %>" selected="true"><%= c.name %></options>
+            <% } else { %>
+              <option value="<%= c.id %>"><%= c.name %></options>
+            <% } %>
           <% } %>
-        <% } %>
-      </select>
-    </p>
-    <p>Excecise:
-      <select id="excercises">
-        <option value="">select for excercise</options>
-        <% for (const e of excercises) { %>
-          <% if (e.label===label) { %>
-            <option value="<%= e.label %>" selected="true"><%= e.label %></options>
-          <% } else { %>
-            <option value="<%= e.label %>"><%= e.label %></options>
+        </select>
+      </p>
+      <p>Excecise:
+        <select id="excercises">
+          <option value="">select for excercise</options>
+          <% for (const e of excercises) { %>
+            <% if (e.label===label) { %>
+              <option value="<%= e.label %>" selected="true"><%= e.label %></options>
+            <% } else { %>
+              <option value="<%= e.label %>"><%= e.label %></options>
+            <% } %>
           <% } %>
-        <% } %>
-      </select>
-      問題カテゴリー:<%=excercise.category%>、重み(難易度)<%=excercise.weight%>、
-      <a href="<%=question_url%>" target="question">問題</a>
-    </p>
-    <p>
-      Student:
-      <button type="button" onclick="pre_student()">&lt;前の学生</button>
-      <select id="students">
-        <% for (const s of students) { %>
-          <% if (s.account===student) { %>
-            <option value="<%= s.account %>" selected="true"><%= s.account %></options>
-          <% } else { %>
-            <option value="<%= s.account %>"><%= s.account %></options>
+        </select>
+        問題カテゴリー:<%=excercise.category%>、重み(難易度)<%=excercise.weight%>、
+        <a href="<%=question_url%>" target="question">問題</a>
+      </p>
+      <p>
+        Student:
+        <button type="button" onclick="pre_student()">&lt;前の学生</button>
+        <select id="students">
+          <% for (const s of students) { %>
+            <% if (s.account===student) { %>
+              <option value="<%= s.account %>" selected="true"><%= s.account %></options>
+            <% } else { %>
+              <option value="<%= s.account %>"><%= s.account %></options>
+            <% } %>
           <% } %>
-        <% } %>
-      </select>
-      <button type="button" onclick="post_student()">次の学生&gt;</button>
-      <a href="<%=submit_url%>" target="submit">提出課題</a>。
-    </p>
-    <hr/>
-    <p>課題の状態：<%=mark.status%></p>
-    <p>評点:<input id="mark" type="text" size="5" value="<%=mark.mark%>"/>
-      (配点:<%=excercise.point%>点中)</p>
-    <p>フィードバック:</p>
-    <pre id="feedback"><%=mark.feedback%></pre>
-    <p><button id="modal_open_button" type="button" onclick="modal_open()">Edit Feedback</button></p>
-    <p><button type="button" onclick="mark()">Mark</button></p>
-    <hr/>
-    <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
-    <div id="modal-overlay">
-      <div id="modal-content">
-        <h2>Edit Feedback</h2>
-        <p><button id="modal_cancel_button" type="button" onclick="modal_close2()">キャンセル</button>
-          <button id="modal_close_button" type="button" onclick="modal_close()">編集終了</button>
-          <button type="button" onclick="check_old_fb()">過去のFBを確認</button>
-        </p>
-        <pre id="old_feedback">過去のフィードバック(下の方が新しい)
-<% for (const fb of mark.feedbacks) { %>
-----------
-<%=fb%>
-<% } %>
-        </pre>
-        <div id="fb_now">
-          <p>今回のフィードバック<button type="button" onclick="clear_fb()">クリア</button></p>
-          <hr/>
-          <pre id="fb"><%=mark.feedback%></pre>
-        </div>
-        <div id="fb_edit">
-          <p>編集欄</p>
-          <textarea id="fb_textarea"></textarea>
-          <p><button type="button" onclick="add_fb()">今回のフィードバックに追加</button>
-            <button type="button" onclick="add_fb_example()">フィードバック例に追加</button></p>
-        </div>
-        <div id="fb_sample">
-          <p>フィードバック例:</p>
-          <% for (const fb of feedbacks) { %>
-          <div id="fb<%=fb._id%>">
-            <pre><%=fb.feedback%></pre>
-            <button type="button" onclick="del_example('<%=fb._id%>')">削除</button>
-            <button type="button" onclick="copy_example('<%=fb._id%>')">編集欄へ</button>
+        </select>
+        <button type="button" onclick="post_student()">次の学生&gt;</button>
+        <a href="<%=submit_url%>" target="submit">提出課題</a>。
+      </p>
+      <hr/>
+      <p>課題の状態：<%=mark.status%></p>
+      <p>評点:<input id="mark" type="text" size="5" value="<%=mark.mark%>"/>
+        (配点:<%=excercise.point%>点中)</p>
+      <p>フィードバック:</p>
+      <pre id="feedback"><%=mark.feedback%></pre>
+      <p><button id="modal_open_button" type="button" onclick="modal_open()">Edit Feedback</button></p>
+      <p><button type="button" onclick="mark()">Mark</button></p>
+      <hr/>
+      <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
+      <div id="modal-overlay">
+        <div id="modal-content">
+          <h2>Edit Feedback</h2>
+          <p><button id="modal_cancel_button" type="button" onclick="modal_close2()">キャンセル</button>
+            <button id="modal_close_button" type="button" onclick="modal_close()">編集終了</button>
+            <button type="button" onclick="check_old_fb()">過去のFBを確認</button>
+          </p>
+          <pre id="old_feedback">過去のフィードバック(下の方が新しい)
+  <% for (const fb of mark.feedbacks) { %>
+  ----------
+  <%=fb%>
+  <% } %>
+          </pre>
+          <div id="fb_now">
+            <p>今回のフィードバック<button type="button" onclick="clear_fb()">クリア</button></p>
+            <hr/>
+            <pre id="fb"><%=mark.feedback%></pre>
           </div>
-          <% } %>
+          <div id="fb_edit">
+            <p>編集欄</p>
+            <textarea id="fb_textarea"></textarea>
+            <p><button type="button" onclick="add_fb()">今回のフィードバックに追加</button>
+              <button type="button" onclick="add_fb_example()">フィードバック例に追加</button></p>
+          </div>
+          <div id="fb_sample">
+            <p>フィードバック例:</p>
+            <% for (const fb of feedbacks) { %>
+            <div id="fb<%=fb._id%>">
+              <pre><%=fb.feedback%></pre>
+              <button type="button" onclick="del_example('<%=fb._id%>')">削除</button>
+              <button type="button" onclick="copy_example('<%=fb._id%>')">編集欄へ</button>
+            </div>
+            <% } %>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   </body>
 </html>

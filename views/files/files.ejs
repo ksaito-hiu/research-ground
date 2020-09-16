@@ -5,38 +5,40 @@
   </head>
   <body>
     <%- include("../include/_header") %>
-    <h1>files</h1>
-    <!--
-    <p style="color:red;font-size:150%;">だいぶ改造したので不具合あったら教えて下さい。</p>
-    -->
-    <p>Message: <%=msg %></p>
-    <p>WebID: <%=webid %></p>
-    <p>Current Directory: <%=path %></p>
-    <form action="<%=baseUrl%>/remove" method="get">
-      <input type="hidden" name="path" value="<%=path %>" />
-      <ul>
-        <% files.forEach(function(file) { %>
-          <% if (file.isDirectory()) { %>
-            <li><input type="checkbox" name="rment" value="<%=file.name %>" />
-                :<a href="<%=baseUrl%>?path=<%=(path+file.name+'/') %>"><%=file.name %></a></li>
-          <% } else { %>
-            <li><input type="checkbox" name="rment" value="<%=file.name %>" />
-                :<%=file.name %>
-                :<a href="<%=user_dir%><%=path%><%=file.name%>">link</a></li>
-          <% } %>
-        <% }); %>
-      </ul>
-      <button type="submit"><%= __('delete_checked') %></button>
-    </form>
-    <form action="<%=baseUrl%>/upload?path=<%=path %>" method="post" enctype="multipart/form-data">
-      <input type="file" name="files" multiple="multiple" />
-      <button type="submit"><%= __('upload_files') %></button>
-    </form>
-    <form action="<%=baseUrl%>/mkdir" method="get">
-      <input type="hidden" name="path" value="<%=path %>" />
-      <input type="text" name="dir" />
-      <button type="submit"><%= __('mkdir') %></button>
-    </form>
-    <p><a href="<%=baseUrl%>/../">Back to research-ground top.</a></p>
+    <main>
+      <h1>files</h1>
+      <!--
+      <p style="color:red;font-size:150%;">だいぶ改造したので不具合あったら教えて下さい。</p>
+      -->
+      <p>Message: <%=msg %></p>
+      <p>WebID: <%=webid %></p>
+      <p>Current Directory: <%=path %></p>
+      <form action="<%=baseUrl%>/remove" method="get">
+        <input type="hidden" name="path" value="<%=path %>" />
+        <ul>
+          <% files.forEach(function(file) { %>
+            <% if (file.isDirectory()) { %>
+              <li><input type="checkbox" name="rment" value="<%=file.name %>" />
+                  :<a href="<%=baseUrl%>?path=<%=(path+file.name+'/') %>"><%=file.name %></a></li>
+            <% } else { %>
+              <li><input type="checkbox" name="rment" value="<%=file.name %>" />
+                  :<%=file.name %>
+                  :<a href="<%=user_dir%><%=path%><%=file.name%>">link</a></li>
+            <% } %>
+          <% }); %>
+        </ul>
+        <button type="submit"><%= __('delete_checked') %></button>
+      </form>
+      <form action="<%=baseUrl%>/upload?path=<%=path %>" method="post" enctype="multipart/form-data">
+        <input type="file" name="files" multiple="multiple" />
+        <button type="submit"><%= __('upload_files') %></button>
+      </form>
+      <form action="<%=baseUrl%>/mkdir" method="get">
+        <input type="hidden" name="path" value="<%=path %>" />
+        <input type="text" name="dir" />
+        <button type="submit"><%= __('mkdir') %></button>
+      </form>
+      <p><a href="<%=baseUrl%>/../">Back to research-ground top.</a></p>
+    </main>
   </body>
 </html>
