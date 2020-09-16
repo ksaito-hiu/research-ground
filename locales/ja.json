@@ -1,5 +1,6 @@
 {
-  "delete_checked": "チェックされたファイルを消去",
-  "upload_files": "ファイルのアップロード",
-  "mkdir": "フォルダを作成"
+	"delete_checked": "チェックされたファイルを消去",
+	"upload_files": "ファイルのアップロード",
+	"mkdir": "フォルダを作成",
+	"placeholder_folder_name": "フォルダ名"
 }
