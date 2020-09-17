@@ -17,24 +17,30 @@
     </script>
   </head>
   <body>
-    <h1>Management of Students</h1>
-    <p>Message: <%=msg%></p>
-    <p>Course IDs:
-      <select id="courses">
-        <option value="">select for search</options>
-        <% for (c of courses) { %>
-          <% if (c.id===selected_course) { %>
-            <option value="<%= c.id %>" selected="true"><%= c.id %></options>
-          <% } else { %>
-            <option value="<%= c.id %>"><%= c.id %></options>
-          <% } %>
-        <% } %>
-      </select></p>
-    <form action="<%=baseUrl%>/admin/students_regist" method="post">
-      <input type="hidden" name="course" value="<%=selected_course%>"/>
-      <textarea name="accounts" cols="20" rows="10"><%=students%></textarea>
-      <p><input type="submit" value="Registrate"/></p>
-    </form>
-    <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+    <%- include("../include/_header") %>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Management of Students</h1>
+        <p>Message: <%=msg%></p>
+        <p>Course IDs:
+          <select id="courses">
+            <option value="">select for search</options>
+            <% for (c of courses) { %>
+              <% if (c.id===selected_course) { %>
+                <option value="<%= c.id %>" selected="true"><%= c.id %></options>
+              <% } else { %>
+                <option value="<%= c.id %>"><%= c.id %></options>
+              <% } %>
+            <% } %>
+          </select></p>
+        <form action="<%=baseUrl%>/admin/students_regist" method="post">
+          <input type="hidden" name="course" value="<%=selected_course%>"/>
+          <textarea name="accounts" cols="20" rows="10"><%=students%></textarea>
+          <p><input type="submit" value="Registrate"/></p>
+        </form>
+        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+      </main>
+    </div>
   </body>
 </html>

@@ -1,0 +1,38 @@
+body {
+    background-color: #EEE;
+    margin: 0;
+}
+
+header {
+    background-color: #000;
+    display: flex;
+    height: 50px;
+    margin: 0;
+}
+
+header h1 {
+    color: #fff;
+    font-size: 2rem;
+    margin: 0.5rem;
+}
+
+.main-wrapper {
+    background-color: #FFF;
+    display: flex;
+    margin: 1rem auto;
+    padding: 1rem 3rem;
+    width: 1024px;
+}
+
+main {
+    margin-left: 2rem;
+}
+
+.header-container {
+    margin: 0 auto;
+    width: 1024px;
+}
+
+.menu {
+    width: 200px;
+}

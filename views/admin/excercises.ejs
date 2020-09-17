@@ -38,42 +38,48 @@
     </script>
   </head>
   <body>
-    <h1>Management of Excercises</h1>
-    <p>Message: <%=msg%></p>
-    <p>Course IDs:
-      <select id="courses">
-        <option value="">select course</options>
-        <% for (const c of courses) { %>
-          <% if (c.id===course) { %>
-            <option value="<%= c.id %>" selected="true"><%= c.id %></options>
-          <% } else { %>
-            <option value="<%= c.id %>"><%= c.id %></options>
-          <% } %>
-        <% } %>
-      </select>,
-      Excercises:
-      <select id="excercises">
-        <option value="">select excercise</options>
-        <% for (const e of excercises) { %>
-          <% if (e.label===label) { %>
-            <option value="<%= e.label %>" selected="true"><%= e.label %></options>
-          <% } else { %>
-            <option value="<%= e.label %>"><%= e.label %></options>
-          <% } %>
-        <% } %>
-      </select>
-    </p>
-    <p>Label: <input type="text" id="label" size="25" value="<%=label%>"/>
-    <p>Category: <input type="text" id="category" size="25" value="<%=category%>"/>
-    <p>Question URL: <input type="text" id="question" size="25" value="<%=question%>"/>
-    <p>Submit URL: <input type="text" id="submit" size="25" value="<%=submit%>"/>
-    <p>Point: <input type="text" id="point" size="25" value="<%=point%>"/>
-    <p>Weight: <input type="text" id="weight" size="25" value="<%=weight%>"/>
-    <p>Memo: <input type="text" id="memo" size="25" value="<%=memo%>"/>
-    <p>
-      <button type="button" onclick="regist();">Registrate</button>
-      <button type="button" onclick="del();">Delete</button>
-    </p>
-    <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+    <%- include("../include/_header") %>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Management of Excercises</h1>
+        <p>Message: <%=msg%></p>
+        <p>Course IDs:
+          <select id="courses">
+            <option value="">select course</options>
+            <% for (const c of courses) { %>
+              <% if (c.id===course) { %>
+                <option value="<%= c.id %>" selected="true"><%= c.id %></options>
+              <% } else { %>
+                <option value="<%= c.id %>"><%= c.id %></options>
+              <% } %>
+            <% } %>
+          </select>,
+          Excercises:
+          <select id="excercises">
+            <option value="">select excercise</options>
+            <% for (const e of excercises) { %>
+              <% if (e.label===label) { %>
+                <option value="<%= e.label %>" selected="true"><%= e.label %></options>
+              <% } else { %>
+                <option value="<%= e.label %>"><%= e.label %></options>
+              <% } %>
+            <% } %>
+          </select>
+        </p>
+        <p>Label: <input type="text" id="label" size="25" value="<%=label%>"/>
+        <p>Category: <input type="text" id="category" size="25" value="<%=category%>"/>
+        <p>Question URL: <input type="text" id="question" size="25" value="<%=question%>"/>
+        <p>Submit URL: <input type="text" id="submit" size="25" value="<%=submit%>"/>
+        <p>Point: <input type="text" id="point" size="25" value="<%=point%>"/>
+        <p>Weight: <input type="text" id="weight" size="25" value="<%=weight%>"/>
+        <p>Memo: <input type="text" id="memo" size="25" value="<%=memo%>"/>
+        <p>
+          <button type="button" onclick="regist();">Registrate</button>
+          <button type="button" onclick="del();">Delete</button>
+        </p>
+        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+      </main>
+    </div>
   </body>
 </html>
