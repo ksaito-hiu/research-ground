@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8"/>
+    <title>research-ground cookie test</title>
+    <link rel="stylesheet" href="test.css" />
+    <script type="text/javascript" src="test.js">
+    </script>
+    <style>
+      body { font-size: 120% ; }
+    </style>
+    <script>
+     function getCookieArray(){
+       const cookies = []
+       if(document.cookie != ''){
+         const pairs = document.cookie.split('; ');
+         for(var i=0;i<pairs.length;i++){
+           const [key,value] = pairs[i].split('=');
+           cookies[key] = decodeURIComponent(value);
+         }
+       }
+       return cookies;
+     }
+     function init() {
+       const pre = document.querySelector("#message");
+       const href = location.href;
+       const pathname = location.pathname;
+       const mount_path = pathname.substring(0,pathname.lastIndexOf('/'));
+       const cookies = getCookieArray();
+       let str = '';
+       str += `href: ${href}\n`;
+       str += `pathname: ${pathname}\n`;
+       str += `mount_path: ${mount_path}\n`;
+       str += `webid: ${cookies['webid']}\n`;
+       str += `uid: ${cookies['uid']}\n`;
+       str += `admin: ${cookies['admin']}\n`;
+       str += `sa: ${cookies['sa']}\n`;
+       pre.textContent = str;
+       const login_path = mount_path+'/auth/login?return_path='+mount_path+'/cookie_test.html';
+       const a = document.querySelector("#login_link");
+       a.setAttribute('href',login_path);
+       const span = document.querySelector('#login_path');
+       span.textContent = login_path;
+     }
+     window.addEventListener('load',init);
+    </script>
+  </head>
+  <body>
+    <h1>research-ground cookie test</h1>
+    <p>mount_pathを求める手順がページの場所に依存するので何か考えないといけない。</p>
+    <pre id="message"></pre>
+    <p>login: <a id="login_link" href="#"><span id="login_path">#</span></a></p>
+  </body>
+</html>
