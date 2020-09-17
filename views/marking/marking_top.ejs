@@ -4,12 +4,18 @@
     <%- include("../include/_head", {title: "Marking Top"}) %>
   </head>
   <body>
-    <h1>Marking top</h1>
-    <p>Message: <%=msg %></p>
-    <ul>
-      <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/marking/marking">採点</a></li>
-      <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/marking/statistics">統計</a></li>
-    </ul>
-    <p><a class="btn wave-effect wave-light" href="<%=baseUrl %>/">Back to research-ground top.</a></p>
+    <%- include("../include/_header") %>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Marking top</h1>
+        <p>Message: <%=msg %></p>
+        <ul>
+          <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/marking/marking">採点</a></li>
+          <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>/marking/statistics">統計</a></li>
+        </ul>
+        <p><a class="btn wave-effect wave-light" href="<%=baseUrl %>/">Back to research-ground top.</a></p>
+      </main>
+    </div>
   </body>
 </html>

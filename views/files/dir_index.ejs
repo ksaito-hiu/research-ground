@@ -4,15 +4,21 @@
     <%- include("../include/_head", {title: "Index"}) %>
   </head>
   <body>
-    <h1>Index of <%=c_path%></h1>
-    <ul>
-      <% files.forEach(function(file) { %>
-        <% if (file.isDirectory()) { %>
-          <li><a href="./<%=(file.name+'/') %>"><%=file.name %></a></li>
-        <% } else { %>
-          <li><a href="./<%=file.name%>"><%=file.name %></a></li>
-        <% } %>
-      <% }); %>
-    </ul>
+    <%- include("../include/_header") %>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Index of <%=c_path%></h1>
+        <ul>
+          <% files.forEach(function(file) { %>
+            <% if (file.isDirectory()) { %>
+              <li><a href="./<%=(file.name+'/') %>"><%=file.name %></a></li>
+            <% } else { %>
+              <li><a href="./<%=file.name%>"><%=file.name %></a></li>
+            <% } %>
+          <% }); %>
+        </ul>
+      </main>
+    </div>
   </body>
 </html>

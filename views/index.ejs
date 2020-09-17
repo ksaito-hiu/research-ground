@@ -4,12 +4,12 @@
     <%- include("include/_head", {title: "research-ground"}) %>
   </head>
   <body>
-    <h1>research-ground Top</h1>
-    <p>Message: <%=msg %></p>
-    <p><a class="btn waves-effect waves-light" href="<%=baseUrl%>/auth">auth</a></p>
-    <p><a class="btn waves-effect waves-light" href="<%=baseUrl%>/files">files</a></p>
-    <p><a class="btn waves-effect waves-light" href="<%=baseUrl%>/admin">admin</a></p>
-    <p><a class="btn waves-effect waves-light" href="<%=baseUrl%>/marking">marking</a></p>
-    <p><a class="btn waves-effect waves-light" href="<%=baseUrl%>/progress">progress</a></p>
+    <%- include("include/_header") %>
+    <div class="main-wrapper">
+    <%- include("include/_nav_main.ejs") %>
+      <main>
+        <p>Message: <%=msg %></p>
+      </main>
+    </div>
   </body>
 </html>
