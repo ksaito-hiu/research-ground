@@ -33,9 +33,9 @@
     </form>
     <form action="<%=baseUrl%>/mkdir" method="get">
       <input type="hidden" name="path" value="<%=path %>" />
-      <input type="text" name="dir" />
+      <input type="text" name="dir" placeholder="<%= __('placeholder_folder_name') %>"/>
       <button type="submit"><%= __('mkdir') %></button>
     </form>
     <p><a href="<%=baseUrl%>/../">Back to research-ground top.</a></p>
-  </body>
+  </body>>
 </html>

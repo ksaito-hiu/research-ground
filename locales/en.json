@@ -1,5 +1,6 @@
 {
   "delete_checked": "delete checked",
   "upload_files": "upload files",
-  "mkdir": "make directory"
+  "mkdir": "make directory",
+  "placeholder_folder_name": "folder name"
 }
