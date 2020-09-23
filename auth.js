@@ -46,6 +46,7 @@ const init = async function(rg) {
   router.get('/callback', async (req, res) => {
     var params = client.callbackParams(req);
     var code_verifier = req.session.local_code_verifier;
+    const baseUrl = rg.config.server.mount_path;
     try {
       const tokenSet = await client.callback(rg.config.auth.redirect_uris[0], params, { code_verifier });
       req.session.id_tokenX = tokenSet.id_token;
@@ -53,7 +54,6 @@ const init = async function(rg) {
       const uid = rg.config.identity.webid2id(webid);
       if (!uid) {
         const msg = 'You do not have permission to login this server.';
-        const baseUrl = rg.config.server.mount_path;
         res.render('error.ejs',{msg, baseUrl});
         return;
       }
@@ -86,10 +86,9 @@ const init = async function(rg) {
         if (!ret.endsWith('/'))
           ret += '/';
       }
-      res.render('auth/loggedin.ejs',{webid,ret});
+      res.render('auth/loggedin.ejs',{webid,ret,baseUrl});
     } catch(err) {
       const msg = err.toString();
-      const baseUrl = rg.config.server.mount_path;
       res.render('error.ejs',{msg, baseUrl});
     }
   });

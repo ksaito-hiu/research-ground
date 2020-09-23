@@ -227,7 +227,7 @@ const init = async function(rg) {
       const file_path = current_path+f.originalname;
       rg.observer(uid,'file_upload',{'path':file_path});
     }
-    const user_dir = baseUrl+'/'+rg.config.identity.classifier(uid)+uid;
+    const user_dir = baseUrl+'/files/'+rg.config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
@@ -260,8 +260,8 @@ const init = async function(rg) {
     }
     const files = await readdir(rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path);
     files.unshift(parentDir);
-    const baseUrl = rg.config.server.mount_path+'/files';
-    const user_dir = baseUrl+'/'+rg.config.identity.classifier(uid)+uid;
+    const baseUrl = rg.config.server.mount_path;
+    const user_dir = baseUrl+'/files/'+rg.config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
@@ -323,8 +323,8 @@ const init = async function(rg) {
     }
     files = await readdir(rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path);
     files.unshift(parentDir);
-    const baseUrl = rg.config.server.mount_path+'/files';
-    const user_dir = baseUrl+'/'+rg.config.identity.classifier(uid)+uid;
+    const baseUrl = rg.config.server.mount_path;
+    const user_dir = baseUrl+'/files/'+rg.config.identity.classifier(uid)+uid;
     const data = {
       msg,
       webid,
@@ -347,8 +347,8 @@ const init = async function(rg) {
     const the_path = rg.config.files.root + rg.config.identity.classifier(uid) + uid + current_path
     const files = await readdir(the_path);
     files.unshift(parentDir);
-    const baseUrl = rg.config.server.mount_path+'/files';
-    const user_dir = baseUrl+'/'+rg.config.identity.classifier(uid)+uid;
+    const baseUrl = rg.config.server.mount_path;
+    const user_dir = baseUrl+'/files/'+rg.config.identity.classifier(uid)+uid;
     const data = {
       msg: 'files module!',
       webid,

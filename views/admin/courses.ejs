@@ -37,9 +37,9 @@
         <p>Message: <%=msg%></p>
         <p>Registered course IDs:
           <select id="courses">
-            <option value="" selected="true">select for search</options>
+            <option value="" selected="true">select for search</option>
             <% for (c of courses) { %>
-            <option value="<%= c.id %>"><%= c.id %></options>
+            <option value="<%= c.id %>"><%= c.id %></option>
             <% } %>
           </select></p>
         <p>Course ID: <input type="text" id="id" value="<%=id%>"/></p>
