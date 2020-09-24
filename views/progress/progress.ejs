@@ -9,7 +9,7 @@
     </style>
     <script>
       function search() {
-        let url = './progress';
+        let url = '<%=baseUrl%>progress/progress';
         url += `?course=${document.querySelector('#courses').value}`;
         location.href=encodeURI(url);
       }
@@ -80,7 +80,7 @@
         </div>
         <% } %>
         <hr/>
-        <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl %>">Back to research-ground top.</a></p>
       </main>
     </div>
   </body>

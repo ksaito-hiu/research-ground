@@ -18,7 +18,7 @@ const init = async function(rg) {
     if (!!req.session && !!req.session.webid)
       webid = req.session.webid;
     if (!webid) {
-      const loginURL = rg.config.server.mount_path+'/auth/login?return_path='+rg.config.server.mount_path+req.originalUrl;
+      const loginURL = rg.config.server.mount_path+'auth/login?return_path='+rg.config.server.mount_path.slice(0,-1)+req.originalUrl;
       res.redirect(loginURL);
       return;
     }
@@ -35,8 +35,8 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
-    o.submit_root = rg.config.server.mount_path+'/files/'+rg.config.identity.classifier(uid)+uid;
-    o.uploader = rg.config.server.mount_path+'/files?path=';
+    o.submit_root = rg.config.server.mount_path+'files/'+rg.config.identity.classifier(uid)+uid;
+    o.uploader = rg.config.server.mount_path+'files?path=';
     o.uid = uid;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     o.course = req.query.course;

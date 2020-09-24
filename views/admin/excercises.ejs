@@ -6,10 +6,10 @@
       function search() {
         const course = document.querySelector('#courses').value;
         const excercise = document.querySelector('#excercises').value;
-        location.href=encodeURI(`./excercises?course=${course}&label=${excercise}`);
+        location.href=encodeURI(`<%=baseUrl%>admin/excercises?course=${course}&label=${excercise}`);
       }
       function regist() {
-        let url = './excercises_regist';
+        let url = '<%=baseUrl%>admin/excercises_regist';
         url += `?label=${document.querySelector('#label').value}`;
         url += `&course=${document.querySelector('#courses').value}`;
         url += `&category=${document.querySelector('#category').value}`;
@@ -21,7 +21,7 @@
         location.href=encodeURI(url);
       }
       function del() {
-        let url = './excercises_del';
+        let url = '<%=baseUrl%>admin/excercises_del';
         url += `?label=${document.querySelector('#label').value}`;
         url += `&course=${document.querySelector('#courses').value}`;
         location.href=encodeURI(url);
@@ -78,7 +78,7 @@
           <button type="button" onclick="regist();">Registrate</button>
           <button type="button" onclick="del();">Delete</button>
         </p>
-        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
       </main>
     </div>
   </body>

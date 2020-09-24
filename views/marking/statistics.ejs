@@ -9,7 +9,7 @@
     </style>
     <script>
       function search() {
-        let url = './statistics';
+        let url = '<%=baseUrl%>marking/statistics';
         url += `?course=${document.querySelector('#courses').value}`;
         location.href=encodeURI(url);
       }
@@ -35,7 +35,7 @@
     <div class="main-wrapper">
     <%- include("../include/_nav_main.ejs") %>
       <main>
-        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
         <hr/>
         <h1>Statistics</h1>
         <p>Message: <%=msg%></p>
@@ -95,7 +95,7 @@
           </tbody>
         </table>
         <hr/>
-        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
       </main>
     </div>
   </body>

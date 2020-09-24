@@ -15,13 +15,13 @@
         <p>Message: <%=msg %></p>
         <p>WebID: <%=webid %></p>
         <p>Current Directory: <%=path %></p>
-        <form action="<%=baseUrl%>/files/remove" method="get">
+        <form action="<%=baseUrl%>files/remove" method="get">
           <input type="hidden" name="path" value="<%=path %>" />
           <ul>
             <% files.forEach(function(file) { %>
               <% if (file.isDirectory()) { %>
                 <li><input type="checkbox" name="rment" value="<%=file.name %>" />
-                    :<a href="<%=baseUrl%>/files?path=<%=(path+file.name+'/') %>"><%=file.name %></a></li>
+                    :<a href="<%=baseUrl%>files?path=<%=(path+file.name+'/') %>"><%=file.name %></a></li>
               <% } else { %>
                 <li><input type="checkbox" name="rment" value="<%=file.name %>" />
                     :<%=file.name %>
@@ -31,16 +31,16 @@
           </ul>
           <button type="submit"><%= __('delete_checked') %></button>
         </form>
-        <form action="<%=baseUrl%>/files/upload?path=<%=path %>" method="post" enctype="multipart/form-data">
+        <form action="<%=baseUrl%>files/upload?path=<%=path %>" method="post" enctype="multipart/form-data">
           <input type="file" name="files" multiple="multiple" />
           <button type="submit"><%= __('upload_files') %></button>
         </form>
-        <form action="<%=baseUrl%>/files/mkdir" method="get">
+        <form action="<%=baseUrl%>files/mkdir" method="get">
           <input type="hidden" name="path" value="<%=path %>" />
           <input type="text" name="dir" placeholder="<%= __('placeholder_folder_name') %>"/>
           <button type="submit"><%= __('mkdir') %></button>
         </form>
-        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
       </main>
     </div>
   </body>

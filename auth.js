@@ -83,8 +83,6 @@ const init = async function(rg) {
       let ret = req.session.return_path;
       if (!ret) {
         ret = rg.config.server.mount_path;
-        if (!ret.endsWith('/'))
-          ret += '/';
       }
       res.render('auth/loggedin.ejs',{webid,ret,baseUrl});
     } catch(err) {

@@ -19,7 +19,7 @@ const init = async function(rg) {
     if (!!req.session && !!req.session.webid)
       webid = req.session.webid;
     if (!webid) {
-      const loginURL = rg.config.server.mount_path+'/auth/login?return_path='+rg.config.server.mount_path+req.originalUrl;
+      const loginURL = rg.config.server.mount_path+'auth/login?return_path='+rg.config.server.mount_path.slice(0,-1)+req.originalUrl;
       res.redirect(loginURL);
       return;
     }
@@ -139,7 +139,7 @@ const init = async function(rg) {
       o.excercise = await rg.colExcercises.findOne({course,label});
       o.question_url = o.excercise.question;
 //if (true) {o.question_url='';console.log('debug GAHA');} // デバッグ時に上の行のかわりに有効にすると楽
-      o.submit_url = rg.config.server.mount_path+ '/files/' + rg.config.identity.classifier(student) + student + o.excercise.submit;
+      o.submit_url = rg.config.server.mount_path+ 'files/' + rg.config.identity.classifier(student) + student + o.excercise.submit;
       if (o.excercise) { // 採点対象がちゃんと存在する場合
         o.feedbacks = await rg.colFeedbacks.find({excercise:o.excercise._id}).sort({cout:-1}).toArray();
         o.mark = await rg.colMarks.findOne({excercise:o.excercise._id,student});
@@ -317,8 +317,8 @@ console.log("GAHA: "+JSON.stringify(ret,null,2));
         const ms = await colMarks.find({excercise:e._id}).toArray();
         o.marks[e.label] = ms;
       }
-      o.submit_root=rg.config.server.mount_path+'/files/';
-      o.marking_url=rg.config.server.mount_path+'/marking/marking';
+      o.submit_root=rg.config.server.mount_path+'files/';
+      o.marking_url=rg.config.server.mount_path+'marking/marking';
       o.classifier = rg.config.identity.classifier; // aaaaa
       o.msg = `Statistics of ${course}.`;
     }
