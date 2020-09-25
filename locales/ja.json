@@ -1,6 +1,21 @@
 {
+	"menu_auth": "アカウント",
+	"menu_files": "ファイル",
+	"menu_admin": "管理",
+	"menu_marking": "採点",
+	"menu_progress": "課題の進み具合",
+	"title_auth": "アカウント",
+	"title_logged_in": "ログインしました",
+	"title_files": "ファイル",
+	"title_progress": "課題の進み具合",
+	"current_directory": "現在のディレクトリ",
+	"index_of": "%s の一覧",
+	"course": "科目",
+	"select_course": "科目を選択",
 	"delete_checked": "チェックされたファイルを消去",
 	"upload_files": "ファイルのアップロード",
 	"mkdir": "フォルダを作成",
-	"placeholder_folder_name": "フォルダ名"
+	"placeholder_folder_name": "フォルダ名",
+	"back_to_top": "トップページに戻る",
+	"back": "戻る"
 }

@@ -1,6 +1,21 @@
 {
+  "menu_auth": "Account",
+  "menu_files": "File",
+  "menu_admin": "Admin",
+  "menu_marking": "Marking",
+  "menu_progress": "Progress",
+  "title_auth": "Account",
+  "title_logged_in": "Logged In",
+  "title_files": "Files",
+  "title_progress": "Progress",
+  "current_directory": "Current Directory",
+  "index_of": "Index of %s",
+  "course": "Course",
+  "select_course": "Select Course",
   "delete_checked": "delete checked",
   "upload_files": "upload files",
   "mkdir": "make directory",
-  "placeholder_folder_name": "folder name"
+  "placeholder_folder_name": "folder name",
+  "back_to_top": "Back to research-ground top",
+  "back": "Back"
 }

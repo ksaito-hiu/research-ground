@@ -8,13 +8,13 @@
     <div class="main-wrapper">
     <%- include("../include/_nav_main.ejs") %>
       <main>
-        <h1>files</h1>
+        <h1><%= __("title_files") %></h1>
         <!--
         <p style="color:red;font-size:150%;">だいぶ改造したので不具合あったら教えて下さい。</p>
         -->
         <p>Message: <%=msg %></p>
         <p>WebID: <%=webid %></p>
-        <p>Current Directory: <%=path %></p>
+        <p><%= __("current_directory") %>: <%=path %></p>
         <form action="<%=baseUrl%>files/remove" method="get">
           <input type="hidden" name="path" value="<%=path %>" />
           <ul>
@@ -40,7 +40,7 @@
           <input type="text" name="dir" placeholder="<%= __('placeholder_folder_name') %>"/>
           <button type="submit"><%= __('mkdir') %></button>
         </form>
-        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>"><%= __("back_to_top") %></a></p>
       </main>
     </div>
   </body>

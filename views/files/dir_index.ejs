@@ -8,7 +8,7 @@
     <div class="main-wrapper">
     <%- include("../include/_nav_main.ejs") %>
       <main>
-        <h1>Index of <%=c_path%></h1>
+        <h1><%= __("index_of", c_path) %></h1>
         <ul>
           <% files.forEach(function(file) { %>
             <% if (file.isDirectory()) { %>
