@@ -38,12 +38,12 @@
     <div class="main-wrapper">
     <%- include("../include/_nav_main.ejs") %>
       <main>
-        <h1>Progress</h1>
+        <h1><%= __("title_progress") %></h1>
         <p>Message: <%=msg%></p>
         <p>UID: <%=uid%></p>
-        <p>Course:
+        <p><%= __("course") %>:
           <select id="courses">
-            <option value="">select course</options>
+            <option value=""><%= __("select_course") %></options>
             <% for (const c of courses) { %>
               <% if (c.id===course) { %>
                 <option value="<%= c.id %>" selected="true"><%= c.name %></options>
@@ -80,7 +80,7 @@
         </div>
         <% } %>
         <hr/>
-        <p><a href="<%=baseUrl %>">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl %>"><%= __("back_to_top") %></a></p>
       </main>
     </div>
   </body>

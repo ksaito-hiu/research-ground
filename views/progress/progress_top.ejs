@@ -8,12 +8,12 @@
     <div class="main-wrapper">
     <%- include("../include/_nav_main.ejs") %>
       <main>
-        <h1>Progress top</h1>
+        <h1><%= __("title_progress") %></h1>
         <p>Message: <%=msg %></p>
         <ul>
-          <li><a href="<%=baseUrl %>progress/progress">進捗</a></li>
+          <li><a href="<%=baseUrl %>progress/progress"><%= __("title_progress") %></a></li>
         </ul>
-        <p><a href="<%=baseUrl %>">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl %>"><%= __("back_to_top") %></a></p>
       </main>
     </div>
   </body>
