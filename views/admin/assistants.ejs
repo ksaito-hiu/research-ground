@@ -4,7 +4,7 @@
     <%- include("../include/_head", {title: "Management of Assistants"}) %>
     <script>
       function regist() {
-        let url = './assistants_regist';
+        let url = '<%=baseUrl%>admin/assistants_regist';
         url += `?course=${document.querySelector('#courses').value}`;
         url += `&account=${document.querySelector('#new_assistant').value}`;
         location.href=encodeURI(url);
@@ -12,7 +12,7 @@
       function del(account) {
         const c = encodeURI(document.querySelector('#courses').value);
         if (c) {
-          location.href=`./assistants_del?course=${c}&account=${account}`;
+          location.href=`<%=baseUrl%>admin/assistants_del?course=${c}&account=${account}`;
         }
       }
       function init() {
@@ -21,7 +21,7 @@
         select.addEventListener('change',function(e){
           if (e.target.value) {
             const c = e.target.value;
-            location.href=`./assistants?selected_course=${c}`;
+            location.href=`<%=baseUrl%>admin/assistants?selected_course=${c}`;
           }
         });
       }
@@ -52,7 +52,7 @@
           <% } %>
           <li><input type="text" id="new_assistant" value=""/><button type="button" onclick="regist();">Registrate a new assistant</button></li>
         </ul>
-        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
       </main>
     </div>
   </body>

@@ -6,14 +6,14 @@
     <title>Management of Courses</title>
     <script>
       function regist() {
-        let url = './courses_regist';
+        let url = '<%=baseUrl%>admin/courses_regist';
         url += `?id=${document.querySelector('#id').value}`;
         url += `&name=${document.querySelector('#name').value}`;
         location.href=encodeURI(url);
       }
       function del() {
         const c = encodeURI(document.querySelector('#id').value);
-        location.href=`./courses_del?id=${c}`;
+        location.href=`<%=baseUrl%>admin/courses_del?id=${c}`;
       }
       function init() {
         const select = document.querySelector('#courses');
@@ -21,7 +21,7 @@
         select.addEventListener('change',function(e){
           if (e.target.value) {
             const c = e.target.value;
-            location.href=`./courses_search?id=${c}`;
+            location.href=`<%=baseUrl%>admin/courses_search?id=${c}`;
           }
         });
       }
@@ -37,9 +37,9 @@
         <p>Message: <%=msg%></p>
         <p>Registered course IDs:
           <select id="courses">
-            <option value="" selected="true">select for search</options>
+            <option value="" selected="true">select for search</option>
             <% for (c of courses) { %>
-            <option value="<%= c.id %>"><%= c.id %></options>
+            <option value="<%= c.id %>"><%= c.id %></option>
             <% } %>
           </select></p>
         <p>Course ID: <input type="text" id="id" value="<%=id%>"/></p>
@@ -48,7 +48,7 @@
           <button type="button" onclick="regist();">Registrate</button>
           <button type="button" onclick="del();">Delete</button>
         </p>
-        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
       </main>
     </div>
   </body>

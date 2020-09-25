@@ -9,7 +9,7 @@
         select.addEventListener('change',function(e){
           if (e.target.value) {
             const c = e.target.value;
-            location.href=`./students?selected_course=${c}`;
+            location.href=`<%=baseUrl%>admin/students?selected_course=${c}`;
           }
         });
       }
@@ -34,12 +34,12 @@
               <% } %>
             <% } %>
           </select></p>
-        <form action="<%=baseUrl%>/admin/students_regist" method="post">
+        <form action="<%=baseUrl%>admin/students_regist" method="post">
           <input type="hidden" name="course" value="<%=selected_course%>"/>
           <textarea name="accounts" cols="20" rows="10"><%=students%></textarea>
           <p><input type="submit" value="Registrate"/></p>
         </form>
-        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
       </main>
     </div>
   </body>

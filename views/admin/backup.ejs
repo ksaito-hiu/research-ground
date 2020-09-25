@@ -7,7 +7,7 @@
       // リストボックスでコースが選択されていたらコースごとのバックアップをする。
       function backup(target) {
         const course = document.querySelector('#courses').value;
-        let url = `./backup?target=${target}`;
+        let url = `<%=baseUrl%>admin/backup?target=${target}`;
         if (course)
           url += `&course=${course}`;
         location.href=encodeURI(url);
@@ -37,7 +37,7 @@
         <p><button type="button" onclick="backup('marks');">Backup marks</button></p>
         <p><button type="button" onclick="backup('feedbacks');">Backup feedbacks</button></p>
         <hr/>
-        <p><a href="<%=baseUrl%>/">Back to research-ground top.</a></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
       </main>
     </div>
   </body>

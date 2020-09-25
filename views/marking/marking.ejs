@@ -35,14 +35,14 @@
     </style>
     <script>
       function search() {
-        let url = './marking';
+        let url = '<%=baseUrl%>marking/marking';
         url += `?course=${document.querySelector('#courses').value}`;
         url += `&label=${document.querySelector('#excercises').value}`;
         url += `&student=${document.querySelector('#students').value}`;
         location.href=encodeURI(url);
       }
       function mark() {
-        let url = './marking_mark';
+        let url = '<%=baseUrl%>marking/marking_mark';
         url += `?course=${document.querySelector('#courses').value}`;
         url += `&label=${document.querySelector('#excercises').value}`;
         url += `&student=${document.querySelector('#students').value}`;
@@ -115,7 +115,7 @@
       }
       async function add_fb_example() {
         const fb = document.querySelector("#fb_textarea").value;
-        let url = './feedback_reserve';
+        let url = '<%=baseUrl%>marking/feedback_reserve';
         url += '?excercise_id=<%=excercise._id%>';
         url += `&feedback=${fb}`;
         const r = await fetch(url);
@@ -141,7 +141,7 @@
         div.appendChild(b2);
       }
       async function del_example(fid) {
-        let url = './feedback_del';
+        let url = '<%=baseUrl%>marking/feedback_del';
         url += `?feedback_id=${fid}`;
         const res = await fetch(url);
         const result = await res.json();
