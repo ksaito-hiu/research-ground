@@ -20,12 +20,22 @@
           <ul>
             <% files.forEach(function(file) { %>
               <% if (file.isDirectory()) { %>
-                <li><input type="checkbox" name="rment" value="<%=file.name %>" />
-                    :<a href="<%=baseUrl%>files?path=<%=(path+file.name+'/') %>"><%=file.name %></a></li>
+                <li>
+                  <label>
+                    <input type="checkbox" name="rment" value="<%=file.name %>" />
+                    <span>:<a href="<%=baseUrl%>files?path=<%=(path+file.name+'/') %>"><%=file.name %></a></span>
+                  </label>
+                </li>
               <% } else { %>
-                <li><input type="checkbox" name="rment" value="<%=file.name %>" />
-                    :<%=file.name %>
-                    :<a href="<%=user_dir%><%=path%><%=file.name%>">link</a></li>
+                <li>
+                  <label>
+                    <input type="checkbox" name="rment" value="<%=file.name %>" />
+                    <span>
+                      :<%=file.name %>
+                      :<a href="<%=user_dir%><%=path%><%=file.name%>">link</a>
+                    </span>
+                  </label>
+                </li>
               <% } %>
             <% }); %>
           </ul>
