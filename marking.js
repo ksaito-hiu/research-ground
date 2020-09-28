@@ -284,7 +284,7 @@ const init = async function(rg) {
       return;
     }
     const fid = new mongo.ObjectID(feedback_id);
-    const ret = await rg.colFeedbacks.update({_id:fid},{$inc: {count: 1}});
+    const ret = await rg.colFeedbacks.updateOne({_id:fid},{$inc: {count: 1}});
 console.log("GAHA: "+JSON.stringify(ret,null,2));
     if (ret.insertedCount===1) {
       res.json({result:'ok'});

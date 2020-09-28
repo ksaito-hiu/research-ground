@@ -282,7 +282,7 @@ const init = async function(rg) {
     const the_path = rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path;
     const files = await readdir(the_path);
     files.unshift(parentDir);
-    const baseUrl = rg.config.server.mount_path+'files';
+    const baseUrl = rg.config.server.mount_path;
     let msg = 'uploaded files are .......';
     for (f of req.files) {
       msg += f.originalname + ",";
