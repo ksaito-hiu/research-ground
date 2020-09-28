@@ -183,16 +183,78 @@ const init = async function(rg) {
     next();
   }
 
+  // 管理者かどうかチェック
+  function isAdmin(uid) {
+    const webid = rg.config.identity.id2webid(uid);
+    if (rg.config.admin.includes(webid))
+      return true;
+    else
+      return false;
+  }
+
+  // 管理者かどうかのチェック。上のloginCheckの後で
+  // 使われることを想定している。(セッションのuidを使うから)
+  function adminCheck(req,res,next) {
+//if (true) {console.log('debug GAHA');next();return;} // デバッグ時に有効にすると楽
+    const uid = req.session.uid;
+    if (! isAdmin(uid,null)) {
+      o.msg = 'You do not have parmissions to edit course data.';
+      res.render('error.ejs',o);
+      return;
+    }
+    next();
+  }
+
+  // uidで指定したユーザーがcourseで指定した科目の
+  // 教員かどうかチェック。科目がnullなら何の科目でも
+  // 教員であればtrue。
+  async function isTeacher(uid,course) {
+    if (!course) {
+      const res = await rg.colTeachers.findOne({account:uid});
+      if (res)
+        return true;
+      else
+        return false;
+    } else {
+      const res = await rg.colTeachers.findOne({account:uid,course});
+      if (res)
+        return true;
+      else
+        return false;
+    }
+  }
+
+  // uidで指定したユーザーがcourseで指定した科目の
+  // SAかどうかチェック。科目がnullなら何の科目でも
+  // SAであればtrue。
+  async function isAssistant(uid,course) {
+    if (!course) {
+      const res = await rg.colAssistants.findOne({account:uid});
+      if (res)
+        return true;
+      else
+        return false;
+    } else {
+      const res = await rg.colAssistants.findOne({account:uid,course});
+      if (res)
+        return true;
+      else
+        return false;
+    }
+  }
+
   // アクセス件チェック
   // 上のloginCheckの後で呼ばれることを前提にしてる
   // のでreq.session.webidにwebidが入っていて、
   // req.session.uidにuidが入っている前提で処理している。
-  function permissionCheck(req,res,next) {
-    if (rg.config.admin.includes(req.session.webid)) { // 管理者はOK
+  async function permissionCheck(req,res,next) {
+    let r = await isAdmin(req.session.uid);
+    if (r) { // 管理者はOK
       next();
       return;
     }
-    if (rg.config.SA.includes(req.session.webid)) { // SAもOK
+    r = await isAssistant(req.session.uid);
+    if (r) { // SAもOK GAHA
       next();
       return;
     }

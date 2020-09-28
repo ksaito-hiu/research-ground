@@ -153,3 +153,68 @@ mongoのCUIでは以下のようにすれば作れるらしい。
     const oid = new ObjectID('507f1f77bcf86cd799439011');
 
 でも、まだ試していない。
+
+-----
+
+2020,09/26: 課題の情報の入力は実際にはWebのUI使わずに以下の
+JavaScriptで入れた。一旦入れて採点始めたら不用意に消すと、
+`_id`の情報が書き変わってダメになるので注意。ただ色々参考に
+なるはずなので、ここにコピペして残しておく。
+
+    use research_ground;
+    // wは課題の重みのデータ(基本、応用、総合の区別にもなる)
+    let w = {
+      '1':[3,2,3,2],
+      '2':[3,3,2,2],
+      '3':[3,2,3,2],
+      '4':[3,3,2,2],
+      '5':[3,3,2,2],
+      '6':[3,3,2,2],
+      '7':[3,3,2,2],
+      '8':[3,3,2,2],
+      '9':[3,3,2,2],
+      '10':[3,3,2,2],
+      '11':[3,3,2,2],
+      '12':[3,3,2,2],
+      '13':[6,6,6,6] // 総合課題
+    };
+    // 既存のデーター消すなら
+    db.excercises.remove({course: 'E1066_ksaito'}); // 宮西先生なら E1066_miyanishi
+    // 自動で課題のデーターを入れるなら
+    use research_ground;
+    for (let i=1;i<=13;i++) {
+      let no = ('00'+i).slice(-2);
+      for (let j=1;j<=4;j++) {
+        let sub_no = ('00'+j).slice(-2);
+        db.excercises.insert({
+          label: `map${no}_${sub_no}`,
+          course: 'E1066_ksaito', // 宮西先生なら E1066_miyanishi
+          no,
+          sub_no,
+          question: `https://s314.do-johodai.ac.jp/map/task${no}-${sub_no}.html`,
+          submit: `/map/${no}/${no}-${sub_no}.html`,
+          category: ((w[i][j-1]===3)?'基本':(w[i][j-1]===2)?'応用':'総合'),
+          point: 2,
+          weight: w[i][j-1],
+          memo:''
+        });
+      }
+    }
+
+ただし、01-02の課題は、例外的に提出ファイルが01-02-01.htmlなので、
+そこは手動でUIで変更すべし。
+
+以下もUI使わずにmongoコマンド中のJavaScriptで使えるTips
+
+    const ObjectID = require('mongodb').ObjectID;
+    use research_ground;
+    // 履修者を一人追加(コースが`E1066_ksaito`、アカウントが`s202099999`)
+    db.students.insert({account: 's202099999', course: 'E1066_ksaito' });
+    // 履修者を一人削除(コースが`E1066_ksaito`、アカウントが`s202099999`)
+    db.students.remove({account: 's202099999', course: 'E1066_ksaito' });
+    // 課題の状態を変更するにはまず、課題の`_id`を抽出
+    let e = db.excercises.find({label: 'map01_01', course: 'E1066_ksaito' });
+    // そして学生s202099999の学生の課題提出を書き換える。以下のsubmittedは
+    // 状態である。状態に入れられるのはunsubmitted, submitted, marked, resubmittedのみ
+    // もし、条件に合うmarkが見付からない場合は何もしない。
+    db.marks.update({ excercise: e._id, student: 's202099999' },{ status: 'submitted' });
