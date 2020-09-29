@@ -104,7 +104,7 @@ const init = async function(rg) {
     const label = req.query.label;
     let student = req.query.student;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
-    if (!isAdmin(uid) && !isTeacher(uid,null) && !isAssistant(uid,null)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
       o.msg = "You do not have permission.";
       res.render('error',o);
       return;
@@ -124,7 +124,7 @@ const init = async function(rg) {
     }
     o.excercises = await rg.colExcercises.find({course}).sort({label:1}).toArray();
     // コースの情報を含めて権限が無い場合の応答
-    if (!isAdmin(uid) && !isTeacher(uid,course) && !isAssistant(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course)) && !(await isAssistant(uid,course))) {
       o.students = [];
       o.course=course;
       o.label=label;
@@ -183,14 +183,14 @@ const init = async function(rg) {
     const mark = req.query.mark;
     const feedback = req.query.feedback;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
-    if (!course && !isAdmin(uid) && !isTeacher(uid,null) && !isAssistant(uid,null)) {
+    if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
       o.msg = "You do not have permission.";
       res.render('error',o);
       return;
     }
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();    
     // コースの情報を含めて権限が無い場合の応答
-    if (!isAdmin(uid) && !isTeacher(uid,course) && !isAssistant(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course)) && !(await isAssistant(uid,course))) {
       o.msg = "You do not have permission.";
       res.render('error',o);
       return;
@@ -227,12 +227,12 @@ const init = async function(rg) {
     const e = await colExcercises.findOne({_id: new mongo.ObjectID(excercise_id)});
     const course = e.course;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
-    if (!course && !isAdmin(uid) && !isTeacher(uid,null) && !isAssistant(uid,null)) {
+    if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
       res.json({result:'error'});
       return;
     }
     // コースの情報を含めて権限が無い場合の応答
-    if (!isAdmin(uid) && !isTeacher(uid,course) && !isAssistant(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course)) && !(await isAssistant(uid,course))) {
       res.json({result:'error'});
       return;
     }
@@ -255,12 +255,12 @@ const init = async function(rg) {
     const e = await colExcercises.findOne({_id:f.excercise});
     const course = e?e.course:'';
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
-    if (!course && !isAdmin(uid) && !isTeacher(uid,null) && !isAssistant(uid,null)) {
+    if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
       res.json({result:'error'});
       return;
     }
     // コースの情報を含めて権限が無い場合の応答
-    if (!isAdmin(uid) && !isTeacher(uid,course) && !isAssistant(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course)) && !(await isAssistant(uid,course))) {
       res.json({result:'error'});
       return;
     }
@@ -280,12 +280,12 @@ const init = async function(rg) {
     const e = await colExcercises.findOne({_id:f.excercises});
     const course = e.course;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
-    if (!course && !isAdmin(uid) && !isTeacher(uid,null) && !isAssistant(uid,null)) {
+    if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
       res.json({result:'error'});
       return;
     }
     // コースの情報を含めて権限が無い場合の応答
-    if (!isAdmin(uid) && !isTeacher(uid,course) && !isAssistant(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course)) && !(await isAssistant(uid,course))) {
       res.json({result:'error'});
       return;
     }

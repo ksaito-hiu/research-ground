@@ -43,8 +43,10 @@ const init = async function(rg) {
   function adminCheck(req,res,next) {
 //if (true) {console.log('debug GAHA');next();return;} // デバッグ時に有効にすると楽
     const uid = req.session.uid;
+    const o = {}; // ejsにわたすデーター
     if (! isAdmin(uid,null)) {
       o.msg = 'You do not have parmissions to edit course data.';
+      o.baseUrl = rg.config.server.mount_path;
       o.teacher = req.session.teacher;
       o.sa = req.session.sa;
       res.render('error.ejs',o);
@@ -297,7 +299,7 @@ const init = async function(rg) {
       res.render('admin/assistants',o);
       return;
     }
-    if (!isAdmin(uid) && !isTeacher(uid,selected_course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,selected_course))) {
       o.selected_course = "";
       o.assistants = [];
       o.msg = `You do not have parmission to edit the course(${selected_course}).`;
@@ -319,10 +321,10 @@ const init = async function(rg) {
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
-    if (!isAdmin(uid) && !isTeacher(uid,course)) { // 権限チェック
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) { // 権限チェック
       o.selected_course = "";
       o.assistants = [];
-      o.msg = `You do not have parmission to edit the course(${selected_course}).`;
+      o.msg = `You do not have parmission to edit the course(${course}).`;
       res.render('admin/assistants',o);
       return;
     }
@@ -350,10 +352,10 @@ const init = async function(rg) {
       const course = req.query.course;
       const account = req.query.account;
       o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
-      if (!isAdmin(uid) && !isTeacher(uid,course)) { // 権限チェック
+      if (!isAdmin(uid) && !(await isTeacher(uid,course))) { // 権限チェック
         o.selected_course = "";
         o.assistants = [];
-        o.msg = `You do not have parmission to edit the course(${selected_course}).`;
+        o.msg = `You do not have parmission to edit the course(${course}).`;
         res.render('admin/assistants',o);
         return;
       }
@@ -403,7 +405,11 @@ const init = async function(rg) {
       res.render('admin/students',o);
       return;
     }
-    if (!isAdmin(uid) && !isTeacher(uid,selected_course)) {
+console.log("GAHA1:");
+console.log("GAHA isAdmin:"+isAdmin(uid));
+console.log("GAHA isTeacher:"+await isTeacher(uid,selected_course));
+    if (!isAdmin(uid) && !(await isTeacher(uid,selected_course))) {
+console.log("GAHA2:");
       o.selected_course = "";
       o.students = "";
       o.msg = `You do not have parmission to edit the course(${selected_course}).`;
@@ -429,10 +435,10 @@ const init = async function(rg) {
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
-    if (!isAdmin(uid) && !isTeacher(uid,course)) { // 権限チェック
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) { // 権限チェック
       o.selected_course = "";
       o.students = "";
-      o.msg = `You do not have parmission to edit the course(${selected_course}).`;
+      o.msg = `You do not have parmission to edit the course(${course}).`;
       res.render('admin/students',o);
       return;
     }
@@ -480,7 +486,7 @@ const init = async function(rg) {
     o.baseUrl = rg.config.server.mount_path;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
-    if (!isAdmin(uid) && !isTeacher(uid)) { // 権限が無い時の処理
+    if (!isAdmin(uid) && !(await isTeacher(uid,null))) { // 権限が無い時の処理
       o.msg = `You do not have parmission to edit excercises.`;
       res.render('error',o);
       return;
@@ -532,7 +538,7 @@ const init = async function(rg) {
       res.render('admin/excercises',o);
       return;
     }
-    if (!isAdmin(uid) && !isTeacher(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) {
       o.label=o.course=o.category="";
       o.question=o.submit=o.point="";
       o.weight=o.memo="";
@@ -583,7 +589,7 @@ const init = async function(rg) {
       res.render('admin/excercises',o);
       return;
     }
-    if (!isAdmin(uid) && !isTeacher(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) {
       o.label=o.course=o.category="";
       o.question=o.submit=o.point="";
       o.weight=o.memo="";
