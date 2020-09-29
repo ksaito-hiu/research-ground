@@ -45,6 +45,7 @@ const init = async function(rg) {
     const uid = req.session.uid;
     if (! isAdmin(uid,null)) {
       o.msg = 'You do not have parmissions to edit course data.';
+      o.admin = req.session.admin;
       o.teacher = req.session.teacher;
       o.sa = req.session.sa;
       res.render('error.ejs',o);
@@ -98,6 +99,7 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     const course = req.query.course;
@@ -175,6 +177,7 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     const label = req.query.label
@@ -291,7 +294,6 @@ const init = async function(rg) {
     }
     const fid = new mongo.ObjectID(feedback_id);
     const ret = await rg.colFeedbacks.updateOne({_id:fid},{$inc: {count: 1}});
-console.log("GAHA: "+JSON.stringify(ret,null,2));
     if (ret.insertedCount===1) {
       res.json({result:'ok'});
       return;
@@ -308,6 +310,7 @@ console.log("GAHA: "+JSON.stringify(ret,null,2));
     const course = req.query.course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -340,6 +343,7 @@ console.log("GAHA: "+JSON.stringify(ret,null,2));
   router.get("/",loginCheck, (req, res) => {
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.msg = `Marking.`;

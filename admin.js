@@ -47,6 +47,7 @@ const init = async function(rg) {
     if (! isAdmin(uid,null)) {
       o.msg = 'You do not have parmissions to edit course data.';
       o.baseUrl = rg.config.server.mount_path;
+      o.admin = req.session.admin;
       o.teacher = req.session.teacher;
       o.sa = req.session.sa;
       res.render('error.ejs',o);
@@ -105,6 +106,7 @@ const init = async function(rg) {
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     o.id = o.name = '';
     o.msg = 'This page is for course admin.';
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     res.render('admin/courses',o);
@@ -113,7 +115,8 @@ const init = async function(rg) {
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
-    o.teacher = req.session.teacher = req.session.teacher;
+    o.admin = req.session.admin;
+    o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     try {
       const id = req.query.id;
@@ -141,6 +144,7 @@ const init = async function(rg) {
   router.get('/courses_regist',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     try {
@@ -167,6 +171,7 @@ const init = async function(rg) {
   router.get('/courses_del',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     try {
@@ -206,6 +211,7 @@ const init = async function(rg) {
     const selected_course = req.query.selected_course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -227,6 +233,7 @@ const init = async function(rg) {
     const account = req.query.account;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -247,6 +254,7 @@ const init = async function(rg) {
   router.get('/teachers_del',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     try {
@@ -289,6 +297,7 @@ const init = async function(rg) {
     const selected_course = req.query.selected_course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -318,6 +327,7 @@ const init = async function(rg) {
     const account = req.query.account;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -346,6 +356,7 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     try {
@@ -395,6 +406,7 @@ const init = async function(rg) {
     const selected_course = req.query.selected_course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -405,11 +417,7 @@ const init = async function(rg) {
       res.render('admin/students',o);
       return;
     }
-console.log("GAHA1:");
-console.log("GAHA isAdmin:"+isAdmin(uid));
-console.log("GAHA isTeacher:"+await isTeacher(uid,selected_course));
     if (!isAdmin(uid) && !(await isTeacher(uid,selected_course))) {
-console.log("GAHA2:");
       o.selected_course = "";
       o.students = "";
       o.msg = `You do not have parmission to edit the course(${selected_course}).`;
@@ -432,6 +440,7 @@ console.log("GAHA2:");
     let accounts = req.body.accounts;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -484,6 +493,7 @@ console.log("GAHA2:");
     const course = req.query.course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     if (!isAdmin(uid) && !(await isTeacher(uid,null))) { // 権限が無い時の処理
@@ -525,6 +535,7 @@ console.log("GAHA2:");
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     const course = req.query.course;
@@ -577,6 +588,7 @@ console.log("GAHA2:");
     const course = req.query.course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -628,6 +640,7 @@ console.log("GAHA2:");
     if (!target && !course) {
       const o = {}; // ejsにわたすデーター
       o.baseUrl = rg.config.server.mount_path;
+      o.admin = req.session.admin;
       o.teacher = req.session.teacher;
       o.sa = req.session.sa;
       o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
@@ -637,6 +650,7 @@ console.log("GAHA2:");
     if (!target) { // 通常ありえないけど
       const o = {}; // ejsにわたすデーター
       o.baseUrl = rg.config.server.mount_path;
+      o.admin = req.session.admin;
       o.teacher = req.session.teacher;
       o.sa = req.session.sa;
       o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();

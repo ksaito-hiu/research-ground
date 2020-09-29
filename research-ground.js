@@ -118,6 +118,7 @@ const init = async function(config_obj) {
     res.render('index.ejs',{
       msg: str,
       baseUrl: config.server.mount_path,
+      admin: req.session.admin,
       teacher: req.session.teacher,
       sa: req.session.sa
     });

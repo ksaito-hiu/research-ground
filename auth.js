@@ -56,6 +56,7 @@ const init = async function(rg) {
         const msg = 'You do not have permission to login this server.';
         res.render('error.ejs', {
             msg, baseUrl,
+            admin: req.session.admin,
             teacher: req.session.teacher,
             sa: req.session.sa
         });
@@ -90,6 +91,7 @@ const init = async function(rg) {
       }
       res.render('auth/loggedin.ejs', {
         webid, ret, baseUrl,
+        admin: req.session.admin,
         teacher: req.session.teacher,
         sa: req.session.sa
       });
@@ -97,6 +99,7 @@ const init = async function(rg) {
       const msg = err.toString();
       res.render('error.ejs', {
         msg, baseUrl,
+        admin: req.session.admin,
         teacher: req.session.teacher,
         sa: req.session.sa
       });
@@ -115,6 +118,9 @@ const init = async function(rg) {
     }
     req.session.webid = null;
     req.session.uid = null;
+    req.session.admin = null;
+    req.session.teacher = null;
+    req.session.sa = null;
     res.clearCookie('webid');
     res.clearCookie('uid');
     res.clearCookie('admin');
@@ -133,6 +139,7 @@ const init = async function(rg) {
     const baseUrl = rg.config.server.mount_path;
     res.render('auth/auth.ejs', {
       msg, baseUrl,
+      admin: req.session.admin,
       teacher: req.session.teacher,
       sa: req.session.sa
     });

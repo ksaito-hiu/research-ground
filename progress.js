@@ -35,6 +35,7 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.submit_root = rg.config.server.mount_path+'files/'+rg.config.identity.classifier(uid)+uid;
@@ -55,7 +56,6 @@ const init = async function(rg) {
           o.total += Number(m.mark);
         }
       }
-console.log("GAHA: "+o.marks.length);
     } else {
       o.excercises = [];
       o.marks = [];
@@ -76,6 +76,7 @@ console.log("GAHA: "+o.marks.length);
   router.get("/",loginCheck, (req, res) => {
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
     o.msg = `Progress.`;

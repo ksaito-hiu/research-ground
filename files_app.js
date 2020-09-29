@@ -71,6 +71,7 @@ const init = async function(rg) {
           const baseUrl = rg.config.server.mount_path;
           res.render('files/dir_index', {
             c_path, files, baseUrl,
+            admin: req.session.admin,
             teacher: req.session.teacher,
             sa: req.session.sa
           });
@@ -204,6 +205,7 @@ const init = async function(rg) {
     const uid = req.session.uid;
     if (! isAdmin(uid,null)) {
       o.msg = 'You do not have parmissions to edit course data.';
+      o.admin = req.session.admin;
       o.teacher = req.session.teacher;
       o.sa = req.session.sa;
       res.render('error.ejs',o);
@@ -255,13 +257,11 @@ const init = async function(rg) {
   // のでreq.session.webidにwebidが入っていて、
   // req.session.uidにuidが入っている前提で処理している。
   async function permissionCheck(req,res,next) {
-    let r = await isAdmin(req.session.uid);
-    if (r) { // 管理者はOK
+    if (await isAdmin(req.session.uid)) { // 管理者はOK
       next();
       return;
     }
-    r = await isAssistant(req.session.uid);
-    if (r) { // SAもOK GAHA
+    if (await isAssistant(req.session.uid)) { // SAもOK GAHA
       next();
       return;
     }
@@ -274,6 +274,7 @@ const init = async function(rg) {
       const baseUrl = rg.config.server.mount_path;
       res.status(403).render('error.ejs', {
         msg, baseUrl,
+        admin: req.session.admin,
         teacher: req.session.teacher,
         sa: req.session.sa
       });
@@ -308,6 +309,7 @@ const init = async function(rg) {
       files,
       user_dir,
       baseUrl,
+      admin: req.session.admin,
       teacher: req.session.teacher,
       sa: req.session.sa
     };
@@ -344,6 +346,7 @@ const init = async function(rg) {
       files,
       user_dir,
       baseUrl,
+      admin: req.session.admin,
       teacher: req.session.teacher,
       sa: req.session.sa
     };
@@ -409,6 +412,7 @@ const init = async function(rg) {
       files,
       user_dir,
       baseUrl,
+      admin: req.session.admin,
       teacher: req.session.teacher,
       sa: req.session.sa
     };
@@ -435,6 +439,7 @@ const init = async function(rg) {
       files,
       user_dir,
       baseUrl,
+      admin: req.session.admin,
       teacher: req.session.teacher,
       sa: req.session.sa
     };
