@@ -43,8 +43,12 @@ const init = async function(rg) {
   function adminCheck(req,res,next) {
 //if (true) {console.log('debug GAHA');next();return;} // デバッグ時に有効にすると楽
     const uid = req.session.uid;
+    const o = {}; // ejsにわたすデーター
     if (! isAdmin(uid,null)) {
       o.msg = 'You do not have parmissions to edit course data.';
+      o.baseUrl = rg.config.server.mount_path;
+      o.teacher = req.session.teacher;
+      o.sa = req.session.sa;
       res.render('error.ejs',o);
       return;
     }
@@ -101,12 +105,16 @@ const init = async function(rg) {
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     o.id = o.name = '';
     o.msg = 'This page is for course admin.';
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     res.render('admin/courses',o);
   });
   router.get('/courses_search',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
+    o.teacher = req.session.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     try {
       const id = req.query.id;
       if (!id) {
@@ -133,6 +141,8 @@ const init = async function(rg) {
   router.get('/courses_regist',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     try {
       const id = req.query.id;
       const name = req.query.name;
@@ -157,6 +167,8 @@ const init = async function(rg) {
   router.get('/courses_del',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     try {
       const id = req.query.id;
       if (!id) {
@@ -194,6 +206,8 @@ const init = async function(rg) {
     const selected_course = req.query.selected_course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     if (!selected_course) { // コースが選択されてない場合
       o.selected_course = "";
@@ -213,6 +227,8 @@ const init = async function(rg) {
     const account = req.query.account;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     if (!course || !account) { // コースやアカウントの指定がない場合
       o.selected_course = "";
@@ -231,6 +247,8 @@ const init = async function(rg) {
   router.get('/teachers_del',loginCheck,adminCheck,async (req,res)=>{
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     try {
       const course = req.query.course;
       const account = req.query.account;
@@ -271,6 +289,8 @@ const init = async function(rg) {
     const selected_course = req.query.selected_course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     if (!selected_course) { // コースが選択されてない場合
       o.selected_course = "";
@@ -279,7 +299,7 @@ const init = async function(rg) {
       res.render('admin/assistants',o);
       return;
     }
-    if (!isAdmin(uid) && !isTeacher(uid,selected_course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,selected_course))) {
       o.selected_course = "";
       o.assistants = [];
       o.msg = `You do not have parmission to edit the course(${selected_course}).`;
@@ -298,11 +318,13 @@ const init = async function(rg) {
     const account = req.query.account;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
-    if (!isAdmin(uid) && !isTeacher(uid,course)) { // 権限チェック
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) { // 権限チェック
       o.selected_course = "";
       o.assistants = [];
-      o.msg = `You do not have parmission to edit the course(${selected_course}).`;
+      o.msg = `You do not have parmission to edit the course(${course}).`;
       res.render('admin/assistants',o);
       return;
     }
@@ -324,14 +346,16 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     try {
       const course = req.query.course;
       const account = req.query.account;
       o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
-      if (!isAdmin(uid) && !isTeacher(uid,course)) { // 権限チェック
+      if (!isAdmin(uid) && !(await isTeacher(uid,course))) { // 権限チェック
         o.selected_course = "";
         o.assistants = [];
-        o.msg = `You do not have parmission to edit the course(${selected_course}).`;
+        o.msg = `You do not have parmission to edit the course(${course}).`;
         res.render('admin/assistants',o);
         return;
       }
@@ -371,6 +395,8 @@ const init = async function(rg) {
     const selected_course = req.query.selected_course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     if (!selected_course) { // コースが選択されてない場合
       o.selected_course = "";
@@ -379,7 +405,11 @@ const init = async function(rg) {
       res.render('admin/students',o);
       return;
     }
-    if (!isAdmin(uid) && !isTeacher(uid,selected_course)) {
+console.log("GAHA1:");
+console.log("GAHA isAdmin:"+isAdmin(uid));
+console.log("GAHA isTeacher:"+await isTeacher(uid,selected_course));
+    if (!isAdmin(uid) && !(await isTeacher(uid,selected_course))) {
+console.log("GAHA2:");
       o.selected_course = "";
       o.students = "";
       o.msg = `You do not have parmission to edit the course(${selected_course}).`;
@@ -402,11 +432,13 @@ const init = async function(rg) {
     let accounts = req.body.accounts;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
-    if (!isAdmin(uid) && !isTeacher(uid,course)) { // 権限チェック
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) { // 権限チェック
       o.selected_course = "";
       o.students = "";
-      o.msg = `You do not have parmission to edit the course(${selected_course}).`;
+      o.msg = `You do not have parmission to edit the course(${course}).`;
       res.render('admin/students',o);
       return;
     }
@@ -452,7 +484,9 @@ const init = async function(rg) {
     const course = req.query.course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
-    if (!isAdmin(uid) && !isTeacher(uid)) { // 権限が無い時の処理
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
+    if (!isAdmin(uid) && !(await isTeacher(uid,null))) { // 権限が無い時の処理
       o.msg = `You do not have parmission to edit excercises.`;
       res.render('error',o);
       return;
@@ -491,6 +525,8 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     const course = req.query.course;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     o.excercises = await rg.colExcercises.find({course}).sort({label:1}).toArray();
@@ -502,7 +538,7 @@ const init = async function(rg) {
       res.render('admin/excercises',o);
       return;
     }
-    if (!isAdmin(uid) && !isTeacher(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) {
       o.label=o.course=o.category="";
       o.question=o.submit=o.point="";
       o.weight=o.memo="";
@@ -541,6 +577,8 @@ const init = async function(rg) {
     const course = req.query.course;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     o.excercises = await rg.colExcercises.find({course}).sort({label:1}).toArray();
     if (!course) {
@@ -551,7 +589,7 @@ const init = async function(rg) {
       res.render('admin/excercises',o);
       return;
     }
-    if (!isAdmin(uid) && !isTeacher(uid,course)) {
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) {
       o.label=o.course=o.category="";
       o.question=o.submit=o.point="";
       o.weight=o.memo="";
@@ -590,6 +628,8 @@ const init = async function(rg) {
     if (!target && !course) {
       const o = {}; // ejsにわたすデーター
       o.baseUrl = rg.config.server.mount_path;
+      o.teacher = req.session.teacher;
+      o.sa = req.session.sa;
       o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
       res.render('admin/backup',o);
       return;
@@ -597,6 +637,8 @@ const init = async function(rg) {
     if (!target) { // 通常ありえないけど
       const o = {}; // ejsにわたすデーター
       o.baseUrl = rg.config.server.mount_path;
+      o.teacher = req.session.teacher;
+      o.sa = req.session.sa;
       o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
       res.render('admin/backup',o);
       return;
@@ -652,7 +694,11 @@ const init = async function(rg) {
       msg = 'You are not logged in.';
     }
     const baseUrl = rg.config.server.mount_path;
-    res.render('admin/admin_top.ejs',{msg,baseUrl});
+    res.render('admin/admin_top.ejs', {
+      msg, baseUrl,
+      teacher: req.session.teacher,
+      sa: req.session.sa
+    });
   });
 
   return router;

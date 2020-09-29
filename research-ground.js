@@ -115,7 +115,12 @@ const init = async function(config_obj) {
     } else {
       str = 'You are not logged in.';
     }
-    res.render('index.ejs',{msg:str,baseUrl:config.server.mount_path});
+    res.render('index.ejs',{
+      msg: str,
+      baseUrl: config.server.mount_path,
+      teacher: req.session.teacher,
+      sa: req.session.sa
+    });
   });
 
   return app;

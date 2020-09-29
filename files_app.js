@@ -69,7 +69,11 @@ const init = async function(rg) {
           files.unshift(parentDir);
           let c_path = path.join(rg.config.server.mount_path,'files/',req.path);
           const baseUrl = rg.config.server.mount_path;
-          res.render('files/dir_index',{c_path,files,baseUrl});
+          res.render('files/dir_index', {
+            c_path, files, baseUrl,
+            teacher: req.session.teacher,
+            sa: req.session.sa
+          });
           return;
         } else {
           const basename = path.basename(the_path);
@@ -200,6 +204,8 @@ const init = async function(rg) {
     const uid = req.session.uid;
     if (! isAdmin(uid,null)) {
       o.msg = 'You do not have parmissions to edit course data.';
+      o.teacher = req.session.teacher;
+      o.sa = req.session.sa;
       res.render('error.ejs',o);
       return;
     }
@@ -266,7 +272,11 @@ const init = async function(rg) {
     if (!req.path.startsWith(the_dir)) {
       const msg = 'You do not have permission.';
       const baseUrl = rg.config.server.mount_path;
-      res.status(403).render('error.ejs',{msg,baseUrl});
+      res.status(403).render('error.ejs', {
+        msg, baseUrl,
+        teacher: req.session.teacher,
+        sa: req.session.sa
+      });
       return;
     }
     next();
@@ -297,7 +307,9 @@ const init = async function(rg) {
       path: current_path,
       files,
       user_dir,
-      baseUrl
+      baseUrl,
+      teacher: req.session.teacher,
+      sa: req.session.sa
     };
     res.render('files/files.ejs',data);
   });
@@ -331,7 +343,9 @@ const init = async function(rg) {
       path: current_path,
       files,
       user_dir,
-      baseUrl
+      baseUrl,
+      teacher: req.session.teacher,
+      sa: req.session.sa
     };
     res.render('files/files.ejs',data);
   });
@@ -394,7 +408,9 @@ const init = async function(rg) {
       path: current_path,
       files,
       user_dir,
-      baseUrl
+      baseUrl,
+      teacher: req.session.teacher,
+      sa: req.session.sa
     };
     res.render('files/files.ejs',data);
   });
@@ -418,7 +434,9 @@ const init = async function(rg) {
       path: current_path,
       files,
       user_dir,
-      baseUrl
+      baseUrl,
+      teacher: req.session.teacher,
+      sa: req.session.sa
     };
     res.render('files/files.ejs',data);
   });

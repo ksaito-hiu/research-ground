@@ -35,6 +35,8 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.submit_root = rg.config.server.mount_path+'files/'+rg.config.identity.classifier(uid)+uid;
     o.uploader = rg.config.server.mount_path+'files?path=';
     o.uid = uid;
@@ -74,6 +76,8 @@ console.log("GAHA: "+o.marks.length);
   router.get("/",loginCheck, (req, res) => {
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
     o.msg = `Progress.`;
     res.render('progress/progress_top',o);
   });
