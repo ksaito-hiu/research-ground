@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <%- include("../include/_head", {title: "Index"}) %>
+    <meta charset="UTF-8">
+    <title><%= __("index_of", c_path) %></title>
   </head>
   <body>
-    <%- include("../include/_header") %>
-    <div class="main-wrapper">
-    <%- include("../include/_nav_main.ejs") %>
-      <main>
         <h1><%= __("index_of", c_path) %></h1>
         <ul>
           <% files.forEach(function(file) { %>
@@ -18,7 +15,5 @@
             <% } %>
           <% }); %>
         </ul>
-      </main>
-    </div>
   </body>
 </html>

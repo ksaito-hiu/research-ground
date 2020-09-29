@@ -59,7 +59,7 @@ const init = async function(rg) {
     const the_path = rg.config.files.root + req.path;
     const stats = await stat(the_path);
     if (!!stats && stats.isDirectory()) {
-      if (req.accepts('json')==='json') {
+      if (req.accepts(['html', 'json'])==='json') {
         const files = await readdir(the_path);
         res.json({files});
         return;
@@ -68,7 +68,8 @@ const init = async function(rg) {
           const files = await readdir(the_path);
           files.unshift(parentDir);
           let c_path = path.join(rg.config.server.mount_path,'files/',req.path);
-          res.render('files/dir_index',{c_path,files});
+          const baseUrl = rg.config.server.mount_path;
+          res.render('files/dir_index',{c_path,files,baseUrl});
           return;
         } else {
           const basename = path.basename(the_path);

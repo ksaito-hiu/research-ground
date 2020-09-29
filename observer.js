@@ -25,7 +25,7 @@ const init = function(rg) {
           const m = await colMarks.findOne({excercise:e._id,student:uid});
           if (m) {
             m.status = 'resubmitted';
-            await colMarks.updateOne({excercise:e._id,student:uid},m);
+            await colMarks.updateOne({excercise:e._id,student:uid},{$set:m});
           } else {
             const new_m = {
               excercise:e._id,
