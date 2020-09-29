@@ -2,10 +2,10 @@
     <div class="menu collection">
         <a href="<%=baseUrl%>auth" class="collection-item"><%= __("menu_auth") %></a>
         <a href="<%=baseUrl%>files" class="collection-item"><%= __("menu_files") %></a>
-        <% if (teacher) { %>
+        <% if (admin || teacher) { %>
         <a href="<%=baseUrl%>admin" class="collection-item"><%= __("menu_admin") %></a>
         <% } %>
-        <% if (teacher || sa) { %>
+        <% if (admin || teacher || sa) { %>
         <a href="<%=baseUrl%>marking" class="collection-item"><%= __("menu_marking") %></a>
         <% } %>
         <a href="<%=baseUrl%>progress" class="collection-item"><%= __("menu_progress") %></a>
