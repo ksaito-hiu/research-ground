@@ -54,7 +54,11 @@ const init = async function(rg) {
       const uid = rg.config.identity.webid2id(webid);
       if (!uid) {
         const msg = 'You do not have permission to login this server.';
-        res.render('error.ejs',{msg, baseUrl});
+        res.render('error.ejs', {
+            msg, baseUrl,
+            teacher: req.session.teacher,
+            sa: req.session.sa
+        });
         return;
       }
       let admin,teacher,sa;
@@ -84,10 +88,18 @@ const init = async function(rg) {
       if (!ret) {
         ret = rg.config.server.mount_path;
       }
-      res.render('auth/loggedin.ejs',{webid,ret,baseUrl});
+      res.render('auth/loggedin.ejs', {
+        webid, ret, baseUrl,
+        teacher: req.session.teacher,
+        sa: req.session.sa
+      });
     } catch(err) {
       const msg = err.toString();
-      res.render('error.ejs',{msg, baseUrl});
+      res.render('error.ejs', {
+        msg, baseUrl,
+        teacher: req.session.teacher,
+        sa: req.session.sa
+      });
     }
   });
 
@@ -106,6 +118,7 @@ const init = async function(rg) {
     res.clearCookie('webid');
     res.clearCookie('uid');
     res.clearCookie('admin');
+    res.clearCookie('teacher');
     res.clearCookie('sa');
     const theUrl = client.endSessionUrl(params);
     res.redirect(theUrl);
@@ -118,7 +131,11 @@ const init = async function(rg) {
       msg = 'You are not logged in.';
     }
     const baseUrl = rg.config.server.mount_path;
-    res.render('auth/auth.ejs',{msg,baseUrl});
+    res.render('auth/auth.ejs', {
+      msg, baseUrl,
+      teacher: req.session.teacher,
+      sa: req.session.sa
+    });
   });
 
   return router;
