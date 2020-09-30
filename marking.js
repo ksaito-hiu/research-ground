@@ -58,7 +58,7 @@ const init = async function(rg) {
   // 教員かどうかチェック。科目がnullなら何の科目でも
   // 教員であればtrue。
   async function isTeacher(uid,course) {
-    if (!course) {
+    if (!!course) {
       const res = await rg.colTeachers.findOne({account:uid,course});
       if (res)
         return true;
@@ -77,7 +77,7 @@ const init = async function(rg) {
   // SAかどうかチェック。科目がnullなら何の科目でも
   // SAであればtrue。
   async function isAssistant(uid,course) {
-    if (!course) {
+    if (!!course) {
       const res = await rg.colAssistants.findOne({account:uid,course});
       if (res)
         return true;
