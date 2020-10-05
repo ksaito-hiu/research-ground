@@ -159,7 +159,7 @@ const init = async function(rg) {
       if (o.excercise) { // 採点対象がちゃんと存在する場合
         o.question_url = o.excercise.question;
         o.submit_url = rg.config.server.mount_path+ 'files/' + rg.config.identity.classifier(student) + student + o.excercise.submit;
-        o.feedbacks = await rg.colFeedbacks.find({excercise:o.excercise._id}).sort({cout:-1}).toArray();
+        o.feedbacks = await rg.colFeedbacks.find({excercise:o.excercise._id}).sort({count:-1}).toArray();
         o.label=label; o.course=course; o.student = student;
         const marks = await rg.colMarks.find({excercise:o.excercise._id}).sort({student:1}).toArray();
         o.mark = null; // 過去の採点結果
@@ -330,8 +330,8 @@ const init = async function(rg) {
   router.get('/feedback_countup',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
     const feedback_id = req.query.feedback_id;
-    const f = await colFeedbacks.findOne({_id: new mongo.ObjectID(feedback_id)});
-    const e = await colExcercises.findOne({_id:f.excercises});
+    const f = await colFeedbacks.findOne({_id: new mongo.ObjectId(feedback_id)});
+    const e = await colExcercises.findOne({_id:f.excercise});
     const course = e.course;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
     if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
@@ -343,9 +343,9 @@ const init = async function(rg) {
       res.json({result:'error'});
       return;
     }
-    const fid = new mongo.ObjectID(feedback_id);
+    const fid = new mongo.ObjectId(feedback_id);
     const ret = await rg.colFeedbacks.updateOne({_id:fid},{$inc: {count: 1}});
-    if (ret.insertedCount===1) {
+    if (ret.modifiedCount===1) {
       res.json({result:'ok'});
       return;
     } else {

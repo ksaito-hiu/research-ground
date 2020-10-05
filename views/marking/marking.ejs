@@ -238,17 +238,33 @@
           alert("network error!?");
         }
       }
-      function copy_example(fid) {
+      async function copy_example(fid) {
         const f = document.querySelector(`#fb${fid}`);
         const t = f.querySelector('pre').textContent;
         const fb = document.querySelector("#fb_textarea");
         fb.value = t;
+        let url = '<%=baseUrl%>marking/feedback_countup';
+        url += `?feedback_id=${fid}`;
+        const r = await fetch(url);
+        const reserved = await r.json();
+        if (reserved.result!=='ok') {
+          alert("network error!?");
+          return;
+        }
       }
-      function copy_example_to_new_fb(fid) {
+      async function copy_example_to_new_fb(fid) {
         const f = document.querySelector(`#fb${fid}`);
         const t = f.querySelector('pre').textContent;
         const fb = document.querySelector("#fb");
         fb.textContent += t;
+        let url = '<%=baseUrl%>marking/feedback_countup';
+        url += `?feedback_id=${fid}`;
+        const r = await fetch(url);
+        const reserved = await r.json();
+        if (reserved.result!=='ok') {
+          alert("network error!?");
+          return;
+        }
       }
     </script>
   </head>
