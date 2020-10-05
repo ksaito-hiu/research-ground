@@ -32,6 +32,21 @@
         height: 5em;
         margin: 0 auto;
       }
+      #fb_sample .del_button {
+        float: right;
+      }
+      #fb_sample .del_button + * {
+        clear: both;
+      }
+      main {
+        width: 700px;
+      }
+      .select-wrapper {
+        display: inline-block;
+      }
+      pre {
+        white-space: pre-wrap;
+      }
     </style>
     <script>
       function search() {
@@ -41,13 +56,40 @@
         url += `&student=${document.querySelector('#students').value}`;
         location.href=encodeURI(url);
       }
-      function mark() {
+      function mark() { // 採点結果を記録するだけ
         let url = '<%=baseUrl%>marking/marking_mark';
         url += `?course=${document.querySelector('#courses').value}`;
         url += `&label=${document.querySelector('#excercises').value}`;
         url += `&student=${document.querySelector('#students').value}`;
         url += `&mark=${document.querySelector('#mark').value}`;
         url += `&feedback=${document.querySelector('#feedback').textContent}`;
+        location.href=encodeURI(url);
+      }
+      function mark2() { // 採点結果を記録して次の学生へ移動
+        const select = document.querySelector('#students');
+        if (select.selectedIndex < (select.length - 1))
+          select.selectedIndex++;
+        else
+          select.selectedIndex=0;
+        let next_student = select.options[select.selectedIndex].value;
+        let url = '<%=baseUrl%>marking/marking_mark';
+        url += `?course=${document.querySelector('#courses').value}`;
+        url += `&label=${document.querySelector('#excercises').value}`;
+        url += `&student=${document.querySelector('#students').value}`;
+        url += `&mark=${document.querySelector('#mark').value}`;
+        url += `&feedback=${document.querySelector('#feedback').textContent}`;
+        url += `&next_student=${next_student}`;
+        location.href=encodeURI(url);
+      }
+      function mark3() { // 採点結果を記録して次の採点が必要な学生へ移動
+        const next_student = "<%=need_mark_student_post%>";
+        let url = '<%=baseUrl%>marking/marking_mark';
+        url += `?course=${document.querySelector('#courses').value}`;
+        url += `&label=${document.querySelector('#excercises').value}`;
+        url += `&student=${document.querySelector('#students').value}`;
+        url += `&mark=${document.querySelector('#mark').value}`;
+        url += `&feedback=${document.querySelector('#feedback').textContent}`;
+        url += `&next_student=${next_student}`;
         location.href=encodeURI(url);
       }
       function pre_student() {
@@ -64,6 +106,34 @@
           select.selectedIndex++;
         else
           select.selectedIndex=0;
+        search();
+      }
+      function pre_need_student() {
+        const select = document.querySelector('#students');
+        const pre_student = "<%=need_mark_student_pre%>";
+        if (!pre_student) return;
+        let s=0;
+        for (let i=0;i<select.length;i++) {
+          if (select.options[i].value===pre_student) {
+            s = i;
+            break;
+          }
+        }
+        select.selectedIndex=s;
+        search();
+      }
+      function post_need_student() {
+        const select = document.querySelector('#students');
+        const post_student = "<%=need_mark_student_post%>";
+        if (!post_student) return;
+        let s=0;
+        for (let i=0;i<select.length;i++) {
+          if (select.options[i].value===post_student) {
+            s = i;
+            break;
+          }
+        }
+        select.selectedIndex=s;
         search();
       }
       function init() {
@@ -126,21 +196,36 @@
         }
         const fb_sample = document.querySelector("#fb_sample");
         const div = document.createElement('div');
-        div.setAttribute('id',reserved.feedback_id);
+        div.setAttribute('id','fb'+reserved.feedback_id);
         fb_sample.appendChild(div);
         const p = document.createElement('pre');
         p.textContent = reserved.feedback;
         div.appendChild(p);
-        const b1 = document.createElement('button');
-        b1.appendChild(document.createTextNode("削除"));
-        b1.addEventListener('click',del_example);
-        div.appendChild(b1);
         const b2 = document.createElement('button');
         b2.appendChild(document.createTextNode("編集欄へ"));
-        b2.addEventListener('click',copy_example);
+        b2.addEventListener('click',function(e) {
+          copy_example(reserved.feedback_id);
+        });
         div.appendChild(b2);
+        const b3 = document.createElement('button');
+        b3.appendChild(document.createTextNode("今回のフィードバックへ直接追加"));
+        b3.addEventListener('click',function(e) {
+          copy_example_to_new_fb(reserved.feedback_id);
+        });
+        div.appendChild(b2);
+        const b1 = document.createElement('button');
+        b1.setAttribute('class','del_button');
+        b1.appendChild(document.createTextNode("削除"));
+        b1.addEventListener('click',function(e) {
+          del_example(reserved.feedback_id);
+        });
+        div.appendChild(b1);
       }
       async function del_example(fid) {
+        let confirmed = window.confirm('本当にコメントを削除してよろしいですか？');
+        if (!confirmed) return;
+        confirmed = window.confirm('本当に本当にコメントを削除してよろしいですか？');
+        if (!confirmed) return;
         let url = '<%=baseUrl%>marking/feedback_del';
         url += `?feedback_id=${fid}`;
         const res = await fetch(url);
@@ -158,6 +243,12 @@
         const t = f.querySelector('pre').textContent;
         const fb = document.querySelector("#fb_textarea");
         fb.value = t;
+      }
+      function copy_example_to_new_fb(fid) {
+        const f = document.querySelector(`#fb${fid}`);
+        const t = f.querySelector('pre').textContent;
+        const fb = document.querySelector("#fb");
+        fb.textContent += t;
       }
     </script>
   </head>
@@ -194,9 +285,16 @@
           問題カテゴリー:<%=excercise.category%>、重み(難易度)<%=excercise.weight%>、
           <a href="<%=question_url%>" target="question">問題</a>
         </p>
+        <% if (need_mark_student_no===0) { %>
+        <p>採点が必要な学生<%=need_mark%>人。</p>
+        <% } else { %>
+        <p>採点が必要な学生<%=need_mark%>人中の<%=need_mark_student_no%>番目の学生</p>
+        <% } %>
         <p>
           Student:
-          <button type="button" onclick="pre_student()">&lt;前の学生</button>
+          <button type="button" onclick="pre_need_student()">&lt;&lt;</button>
+          <button type="button" onclick="pre_student()">&lt;</button>
+          前の学生
           <select id="students">
             <% for (const s of students) { %>
               <% if (s.account===student) { %>
@@ -206,17 +304,24 @@
               <% } %>
             <% } %>
           </select>
-          <button type="button" onclick="post_student()">次の学生&gt;</button>
+          次の学生
+          <button type="button" onclick="post_student()">&gt;</button>
+          <button type="button" onclick="post_need_student()">&gt;&gt;</button>
           <a href="<%=submit_url%>" target="submit">提出課題</a>。
         </p>
         <hr/>
         <p>課題の状態：<%=mark.status%></p>
         <p>評点:<input id="mark" type="text" size="5" value="<%=mark.mark%>"/>
           (配点:<%=excercise.point%>点中)</p>
-        <p>フィードバック:</p>
-        <pre id="feedback"><%=mark.feedback%></pre>
+        <p>フィードバックコメント:</p>
+        <div><button type="button" onclick="check_old_fb()">過去のフィードバック</button></div>
+        <div>今回のフィードバック：<pre id="feedback"><%=last_feedback%></pre></div>
         <p><button id="modal_open_button" type="button" onclick="modal_open()">Edit Feedback</button></p>
-        <p><button type="button" onclick="mark()">Mark</button></p>
+        <p>
+          <button type="button" onclick="mark()">Mark</button>
+          <button type="button" onclick="mark2()">Mark&gt;</button>
+          <button type="button" onclick="mark3()">Mark&gt;&gt;</button>
+        </p>
         <hr/>
         <p><a href="<%=baseUrl %>/">Back to research-ground top.</a></p>
         <div id="modal-overlay">
@@ -239,7 +344,7 @@
             </div>
             <div id="fb_edit">
               <p>編集欄</p>
-              <textarea id="fb_textarea"></textarea>
+              <textarea id="fb_textarea"><%=last_feedback%></textarea>
               <p><button type="button" onclick="add_fb()">今回のフィードバックに追加</button>
                 <button type="button" onclick="add_fb_example()">フィードバック例に追加</button></p>
             </div>
@@ -248,8 +353,9 @@
               <% for (const fb of feedbacks) { %>
               <div id="fb<%=fb._id%>">
                 <pre><%=fb.feedback%></pre>
-                <button type="button" onclick="del_example('<%=fb._id%>')">削除</button>
                 <button type="button" onclick="copy_example('<%=fb._id%>')">編集欄へ</button>
+                <button type="button" onclick="copy_example_to_new_fb('<%=fb._id%>')">今回のフィードバックへ直接追加</button>
+                <button type="button" class="del_button" onclick="del_example('<%=fb._id%>')">削除</button>
               </div>
               <% } %>
             </div>

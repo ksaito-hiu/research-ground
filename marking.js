@@ -105,6 +105,7 @@ const init = async function(rg) {
     const course = req.query.course;
     const label = req.query.label;
     let student = req.query.student;
+    o.msg = req.query.msg;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
     if (!isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
       o.msg = "You do not have permission.";
@@ -119,8 +120,11 @@ const init = async function(rg) {
       o.excercise = {category:'',point:2,weight:5};
       o.question_url = o.submit_url = "";
       o.mark = {student:"", status:"", mark:"", feedbacks:[]};
+      o.last_feedback = "";
       o.feedbacks = [];
       o.msg = `At first, select the course. Then push search button.`;
+      o.need_mark=o.need_mark_student_no=0;
+      o.need_mark_student_pre=o.need_mark_student_post="";
       res.render('marking/marking',o);
       return;
     }
@@ -134,42 +138,89 @@ const init = async function(rg) {
       o.excercise = {category:'',point:2,weight:5};
       o.question_url = o.submit_url = "";
       o.mark = {student:"", status:"", mark:"", feedbacks:[]};
+      o.last_feedback = "";
       o.feedbacks = [];
       o.msg = `You do not have permission to mark the course(${course})`;
+      o.need_mark=o.need_mark_student_no=0;
+      o.need_mark_student_pre=o.need_mark_student_post="";
       res.render('marking/marking',o);
       return;
     }
     o.students = await rg.colStudents.find({course}).sort({account:1}).toArray();
     student = student || o.students[0].account;
     if (label) { // 採点対象の指定がある場合
-      o.excercise = await rg.colExcercises.findOne({course,label});
-      o.question_url = o.excercise.question;
-//if (true) {o.question_url='';console.log('debug GAHA');} // デバッグ時に上の行のかわりに有効にすると楽
-      o.submit_url = rg.config.server.mount_path+ 'files/' + rg.config.identity.classifier(student) + student + o.excercise.submit;
+      // 該当する課題のデーターを探してo.excerciseに入れる
+      for (let e of o.excercises) {
+        if (e.course===course && e.label===label) {
+          o.excercise = e;
+          break;
+        }
+      }
       if (o.excercise) { // 採点対象がちゃんと存在する場合
+        o.question_url = o.excercise.question;
+        o.submit_url = rg.config.server.mount_path+ 'files/' + rg.config.identity.classifier(student) + student + o.excercise.submit;
         o.feedbacks = await rg.colFeedbacks.find({excercise:o.excercise._id}).sort({cout:-1}).toArray();
-        o.mark = await rg.colMarks.findOne({excercise:o.excercise._id,student});
         o.label=label; o.course=course; o.student = student;
+        const marks = await rg.colMarks.find({excercise:o.excercise._id}).sort({student:1}).toArray();
+        o.mark = null; // 過去の採点結果
+        o.need_mark = 0; // この課題で採点が必要な生徒の数
+        o.need_mark_student_no = 0; // この課題で採点が必要な生徒うち何番目か
+        o.need_mark_student_pre = ""; // 採点が必要な直前の学生
+        o.need_mark_student_post = ""; // 採点が必要な直後の学生
+        for (let m of marks) {
+          // ここでは履修登録してない学生は省く
+          let risyu = false;
+          for (let i=0;i<o.students.length;i++) {
+            const s = o.students[i];
+            if (m.student === s.account) {
+              risyu = true;
+              break
+            }
+          }
+          if (!risyu)
+            continue;
+          if (m.status==='submitted' || m.status==='resubmitted') { // 採点が必要な場合
+            o.need_mark++;
+            if (m.student < student)
+              o.need_mark_student_pre = m.student;
+            else if (o.need_mark_student_post==="" && m.student > student)
+              o.need_mark_student_post = m.student;
+          }
+          if (m.student === student) {
+            o.mark = m;
+            o.need_mark_student_no = o.need_mark;
+            o.last_feedback = "";
+            if (o.mark.feedbacks.length>=1)
+              o.last_feedback = o.mark.feedbacks[o.mark.feedbacks.length-1];
+          }
+        }
         if (o.mark) { // 過去の採点結果がある場合
-          o.msg = "Old marking was retrived.";
+            o.msg = ((o.msg)?o.msg:"")+" Old marking was retrived.";
         } else { // 過去の採点結果が無い場合
           o.mark = {student:"", status:"", mark:"", feedbacks:[]};
-          o.msg = "Old marking was not found.";
+          o.last_feedback = "";
+          o.msg = ((o.msg)?o.msg:"")+" Old marking was not found.";
         }
       } else { // 採点対象が存在しない場合
         o.excercise = {category:'',point:2,weight:5};
         o.question_url = o.submit_url = "";
         o.mark = {student:"", status:"", mark:"", feedbacks:[]};
+        o.last_feedback = "";
         o.feedbacks = [];
         o.msg = "Specified excercise was not found.";
+        o.need_mark=o.need_mark_student_no=0;
+        o.need_mark_student_pre=o.need_mark_student_post="";
       }
     } else { // 採点対象の指定が無い場合
       o.label=label; o.course=course; o.student = student;
       o.mark = {student:"", status:"", mark:"", feedbacks:[]};
+      o.last_feedback = "";
       o.excercise = {category:'',point:2,weight:5};
       o.question_url = o.submit_url = "";
       o.feedbacks = [];
       o.msg = "Select excercise and student.";
+      o.need_mark=o.need_mark_student_no=0;
+      o.need_mark_student_pre=o.need_mark_student_post="";
     }
     res.render('marking/marking',o);
   });
@@ -180,25 +231,24 @@ const init = async function(rg) {
     o.admin = req.session.admin;
     o.teacher = req.session.teacher;
     o.sa = req.session.sa;
-    const label = req.query.label
     const course = req.query.course;
+    const label = req.query.label
     const student = req.query.student;
     const mark = req.query.mark;
     const feedback = req.query.feedback;
+    let next_student = req.query.next_student;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
     if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
       o.msg = "You do not have permission.";
       res.render('error',o);
       return;
     }
-    o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();    
     // コースの情報を含めて権限が無い場合の応答
     if (!isAdmin(uid) && !(await isTeacher(uid,course)) && !(await isAssistant(uid,course))) {
       o.msg = "You do not have permission.";
       res.render('error',o);
       return;
     }
-    o.excercises = await rg.colExcercises.find({course}).sort({label:1}).toArray();
     // 必要な情報が全てそろってない時の応答(feedbackは省略可)
     if (!course || !label || !student || !mark) {
       o.msg = "There are not enough parameters.";
@@ -215,13 +265,14 @@ const init = async function(rg) {
       mark_data.feedbacks.push(feedback); // 新しいfeedbackを最後に追加
     }
     const ret = await rg.colMarks.updateOne({excercise:o.excercise._id,student},{$set:mark_data},{upsert:true});
-    o.students = await rg.colStudents.find({course}).sort({account:1}).toArray();
-    o.label=label; o.course=course; o.student = student;
-    o.mark = mark_data;
-    o.question_url = o.submit_url = "";
-    o.feedbacks = await rg.colFeedbacks.find({}).sort({count:-1}).toArray();
-    o.msg = `Marked!(${course},${label},${student})`;
-    res.render('marking/marking',o);
+    if (!next_student)
+      next_student = student;
+    let url = o.baseUrl+'marking/marking';
+    url += `?course=${course}`;
+    url += `&label=${label}`;
+    url += `&student=${next_student}`;
+    url += `&msg=Marked!(${course},${label},${student})`;
+    res.redirect(encodeURI(url));
   });
   router.get('/feedback_reserve',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
