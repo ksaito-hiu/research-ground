@@ -67,15 +67,16 @@
       }
       function mark2() { // 採点結果を記録して次の学生へ移動
         const select = document.querySelector('#students');
+        const current_student = select.value;
         if (select.selectedIndex < (select.length - 1))
           select.selectedIndex++;
         else
           select.selectedIndex=0;
-        let next_student = select.options[select.selectedIndex].value;
+        let next_student = select.value;
         let url = '<%=baseUrl%>marking/marking_mark';
         url += `?course=${document.querySelector('#courses').value}`;
         url += `&label=${document.querySelector('#excercises').value}`;
-        url += `&student=${document.querySelector('#students').value}`;
+        url += `&student=${current_student}`;
         url += `&mark=${document.querySelector('#mark').value}`;
         url += `&feedback=${document.querySelector('#feedback').textContent}`;
         url += `&next_student=${next_student}`;
