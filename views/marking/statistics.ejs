@@ -3,8 +3,23 @@
   <head>
     <%- include("../include/_head", {title: "Statistics"}) %>
     <style>
-      table, td, th {
+      table {
+      }
+      th, td {
         border:1px solid #333;
+      }
+      .fixed01, .fixed02 {
+        position: sticky;
+        top: 0;
+        left: 0;
+      }
+      .fixed01 {
+        z-index: 2;
+        background: #333;
+      }
+      .fixed02 {
+        z-index: 1;
+        background: #bbb;
       }
     </style>
     <script>
@@ -58,16 +73,16 @@
         <table>
           <thead>
             <tr>
-              <th></th>
+              <th class="fixed01"></th>
               <% for (const e of excercises) { %>
-              <th><a href="<%=e.question%>" target="question"><%=e.label%></a></th>
+              <th class="fixed02"><a href="<%=e.question%>" target="question"><%=e.label%></a></th>
               <% } %>
             </tr>
           </thead>
           <tbody>
             <% for (const s of students) { %>
             <tr>
-              <td>
+              <td class="fixed02">
                 <%=s.account%>
               </td>
               <% for (const e of excercises) { %>
