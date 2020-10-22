@@ -159,6 +159,10 @@ const init = async function(rg) {
       if (o.excercise) { // 採点対象がちゃんと存在する場合
         o.question_url = o.excercise.question;
         o.submit_url = rg.config.server.mount_path+ 'files/' + rg.config.identity.classifier(student) + student + o.excercise.submit;
+        if (req.query.preventopen) {
+          o.question_url = o.submit_url = "";
+          
+        }
         o.feedbacks = await rg.colFeedbacks.find({excercise:o.excercise._id}).sort({count:-1}).toArray();
         o.label=label; o.course=course; o.student = student;
         const marks = await rg.colMarks.find({excercise:o.excercise._id}).sort({student:1}).toArray();

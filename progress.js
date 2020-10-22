@@ -32,7 +32,11 @@ const init = async function(rg) {
 
 
   router.get('/progress',loginCheck,async (req,res)=>{
-    const uid = req.session.uid;
+    let uid = req.session.uid;
+    // 管理者のみ他のユーザーの情報が表示できる
+    if (req.session.admin && req.query.uid) {
+      uid = req.query.uid;
+    }
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
     o.admin = req.session.admin;
@@ -44,6 +48,11 @@ const init = async function(rg) {
     o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
     o.course = req.query.course;
     if (o.course) {
+      const u = await rg.colStudents.findOne({account:uid ,course:o.course});
+      if (!u) // 履修してるかどうかの情報
+        o.regist_attention = true;
+      else
+        o.regist_attention = false;
       o.excercises = await rg.colExcercises.find({course:o.course}).sort({label:1}).toArray();
       o.marks = [];
       o.total = 0;
@@ -61,6 +70,7 @@ const init = async function(rg) {
       o.marks = [];
       o.total = 0;
       o.perfect = 0;
+      o.regist_attention = false;
     }
     o.msg = "Progress.";
     res.render('progress/progress',o);
