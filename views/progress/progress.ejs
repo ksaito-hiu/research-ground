@@ -71,7 +71,7 @@
           <% if (m) { %>
             <p>状態: <%=status_jp(m.status)%></p>
             <p>点数: <%=m.mark%>/<%=e.point%></p>
-            <pre>feedback: <%=m.feedbacks[m.feedbacks.length-1]%></pre>
+            <div>feedback: <%=m.feedbacks[m.feedbacks.length-1]%></div>
           <% } else { %>
             <p>状態: 未提出</p>
             <p>点数: 0/<%=e.point%></p>

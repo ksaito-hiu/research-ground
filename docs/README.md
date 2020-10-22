@@ -225,7 +225,9 @@ JavaScriptで入れた。一旦入れて採点始めたら不用意に消すと�
 
 * 採点画面で、学生の提出課題と、出題ページを自動で表示させる
   機能を一時停止する方法として、そのページを開くURLのクエリ
-  文字列に`&preventopen=true`を追加するという方法を採用。
+  文字列に`&preventopen=true`を追加するという方法を採用。つまり、
+  以下のようなアドレスでページを開けばOK。
+    + <https://s314.do-johodai.ac.jp/research-ground/marking/marking?course=E1066_ksaito&label=map03_02&student=s201921999&preventopen=true>
 * 課題の進み具合のページ(progressのページ)は、基本的に
   ログイン中のアカウントに関する情報を表示するのだが、
   そのページを開くURLのクエリ文字列に`uid=??????????`を

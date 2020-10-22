@@ -155,9 +155,9 @@
       window.addEventListener('load',init);
 
       function modal_open() {
-        const fb = document.querySelector("#feedback");
-        const fb_e = document.querySelector("#fb");
-        fb_e.textContent = fb.textContent;
+        //const fb = document.querySelector("#feedback");
+        //const fb_e = document.querySelector("#fb");
+        //fb_e.textContent = fb.textContent;
         document.querySelector("#modal_open_button").blur();
         document.querySelector("#modal-overlay").style.display="block";
       }
@@ -185,7 +185,7 @@
         document.querySelector("#fb").textContent += fb;
       }
       async function add_fb_example() {
-        const fb = document.querySelector("#fb_textarea").value;
+        const fb = encodeURI(document.querySelector("#fb_textarea").value);
         let url = '<%=baseUrl%>marking/feedback_reserve';
         url += '?excercise_id=<%=excercise._id%>';
         url += `&feedback=${fb}`;
