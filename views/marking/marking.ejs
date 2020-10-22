@@ -62,7 +62,7 @@
         url += `&label=${document.querySelector('#excercises').value}`;
         url += `&student=${document.querySelector('#students').value}`;
         url += `&mark=${document.querySelector('#mark').value}`;
-        url += `&feedback=${document.querySelector('#feedback').textContent}`;
+        url += `&feedback=${encodeURIComponent(document.querySelector('#feedback').textContent)}`;
         location.href=encodeURI(url);
       }
       function mark2() { // 採点結果を記録して次の学生へ移動
@@ -78,7 +78,7 @@
         url += `&label=${document.querySelector('#excercises').value}`;
         url += `&student=${current_student}`;
         url += `&mark=${document.querySelector('#mark').value}`;
-        url += `&feedback=${document.querySelector('#feedback').textContent}`;
+        url += `&feedback=${encodeURIComponent(document.querySelector('#feedback').textContent)}`;
         url += `&next_student=${next_student}`;
         location.href=encodeURI(url);
       }
@@ -89,7 +89,7 @@
         url += `&label=${document.querySelector('#excercises').value}`;
         url += `&student=${document.querySelector('#students').value}`;
         url += `&mark=${document.querySelector('#mark').value}`;
-        url += `&feedback=${document.querySelector('#feedback').textContent}`;
+        url += `&feedback=${encodeURIComponent(document.querySelector('#feedback').textContent)}`;
         url += `&next_student=${next_student}`;
         location.href=encodeURI(url);
       }
@@ -185,7 +185,7 @@
         document.querySelector("#fb").textContent += fb;
       }
       async function add_fb_example() {
-        const fb = encodeURI(document.querySelector("#fb_textarea").value);
+        const fb = encodeURIComponent(document.querySelector("#fb_textarea").value);
         let url = '<%=baseUrl%>marking/feedback_reserve';
         url += '?excercise_id=<%=excercise._id%>';
         url += `&feedback=${fb}`;

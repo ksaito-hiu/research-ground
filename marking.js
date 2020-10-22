@@ -239,7 +239,7 @@ const init = async function(rg) {
     const label = req.query.label
     const student = req.query.student;
     const mark = req.query.mark;
-    const feedback = req.query.feedback;
+    const feedback = decodeURIComponent(req.query.feedback);
     let next_student = req.query.next_student;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
     if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
@@ -281,7 +281,7 @@ const init = async function(rg) {
   router.get('/feedback_reserve',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
     const excercise_id = req.query.excercise_id;
-    const feedback = req.query.feedback;
+    const feedback = decodeURIComponent(req.query.feedback);
     const e = await colExcercises.findOne({_id: new mongo.ObjectID(excercise_id)});
     const course = e.course;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
