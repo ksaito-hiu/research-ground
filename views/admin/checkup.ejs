@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <%- include("../include/_head", {title: "Fix status of marks"}) %>
+    <script>
+      function fix() {
+        let url = '<%=baseUrl%>admin/checkup_fix';
+        url += `?course=${document.querySelector('#courses').value}`;
+        location.href=encodeURI(url);
+      }
+      function init() {
+        const select = document.querySelector('#courses');
+        select.addEventListener('change',function(e){
+          if (e.target.value) {
+            const c = e.target.value;
+            location.href=`<%=baseUrl%>admin/checkup?selected_course=${c}`;
+          }
+        });
+      }
+      window.addEventListener('load',init);
+    </script>
+  </head>
+  <body>
+    <%- include("../include/_header") %>
+    <div class="main-wrapper">
+    <%- include("../include/_nav_main.ejs") %>
+      <main>
+        <h1>Fix status of marks</h1>
+        <p>Message: <%=msg%></p>
+        <p>提出ファイルをチェックして、提出されているのに未提出の物を探し出し「提出(採点まだ)」の状態にするための管理画面。(主に、履修変更対応のための機能)</p>
+        <p>コースを選択して、当該ファイルを確認した後「Fix status of marks」ボタンを押す。</p>
+        <p>Course IDs:
+          <select id="courses">
+            <option value="">select for search</options>
+            <% for (c of courses) { %>
+              <% if (c.id===selected_course) { %>
+                <option value="<%= c.id %>" selected="true"><%= c.id %></options>
+              <% } else { %>
+                <option value="<%= c.id %>"><%= c.id %></options>
+              <% } %>
+            <% } %>
+          </select></p>
+        <pre>
+          <% for (f of forgotten_files) { %>
+<%=f%>
+          <% } %>
+        </pre>
+        <p><button type="button" onclick="fix();">Fix status of marks</button></p>
+        <p><a href="<%=baseUrl%>">Back to research-ground top.</a></p>
+      </main>
+    </div>
+  </body>
+</html>

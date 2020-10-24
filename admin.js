@@ -95,6 +95,19 @@ const init = async function(rg) {
   }
 
 
+  // パスを調べて非同期でStatsを返す。
+  async function stat(path) {
+    return new Promise((resolve,reject)=>{
+      fs.stat(path,(err,stats)=>{
+        if (err) {
+          resolve(null);
+          return;
+        }
+        resolve(stats);
+      });
+    });
+  }
+
 
 
 
@@ -291,7 +304,7 @@ const init = async function(rg) {
 
 
 
-  // SAの管理(管理者のみ)
+  // SAの管理(教師と管理者のみ)
   router.get('/assistants',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
     const selected_course = req.query.selected_course;
@@ -696,6 +709,111 @@ const init = async function(rg) {
     else
       data = {"error":"specified target is not valid."};
     res.json({data});
+  });
+
+
+
+  router.get('/checkup',loginCheck,async (req,res)=>{
+    const uid = req.session.uid;
+    const selected_course = req.query.selected_course;
+    const o = {}; // ejsにわたすデーター
+    o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
+    o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
+    o.forgotten_files = [];
+    if (!selected_course) { // コースが選択されてない場合
+      o.selected_course = "";
+      o.msg = 'At first, select cource id.';
+      res.render('admin/checkup',o);
+      return;
+    }
+    if (!isAdmin(uid) && !(await isTeacher(uid,selected_course))) {
+      o.selected_course = "";
+      o.msg = `You do not have parmission to edit the course(${selected_course}).`;
+      res.render('admin/checkup',o);
+      return;
+    }
+    
+    o.selected_course = selected_course;
+    o.forgotten_files = [];
+    const excercises = await rg.colExcercises.find({course:selected_course}).sort({label:1}).toArray();
+    const students = await rg.colStudents.find({course:selected_course}).sort({account:1}).toArray();
+    for (s of students) {
+      for (e of excercises) {
+        let the_path = rg.config.files.root;
+        the_path = path.join(the_path,rg.config.identity.classifier(s.account));
+        the_path = path.join(the_path,s.account);
+        the_path = path.join(the_path,e.submit);
+        const stats = await stat(the_path);
+        if (!stats)
+          continue;
+        const mark = await rg.colMarks.findOne({excercise:e._id,student:s.account});
+        if (mark)
+          if (mark.status!=='unsubmitted')
+            continue;
+        o.forgotten_files.push(the_path);
+      }
+    }
+    o.msg = 'The course is selected.';
+    res.render('admin/checkup',o);
+  });
+  // remove状態のmarkについては迷ったので、ファイルがあっても
+  // 手をつけないことにした。unsubmitted状態のmarkはないはずだけど
+  // これについては採点結果、フィードバックともリセットしてsubmitted
+  // の状態になる。
+  router.get('/checkup_fix',loginCheck,async (req,res)=>{
+    const uid = req.session.uid;
+    const course = req.query.course;
+    const o = {}; // ejsにわたすデーター
+    o.baseUrl = rg.config.server.mount_path;
+    o.admin = req.session.admin;
+    o.teacher = req.session.teacher;
+    o.sa = req.session.sa;
+    o.courses = await rg.colCourses.find({}).sort({id:1}).toArray();
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) { // 権限チェック
+      o.selected_course = "";
+      o.assistants = [];
+      o.msg = `You do not have parmission to fix the course marks(course=${course}).`;
+      res.render('admin/checkup',o);
+      return;
+    }
+    if (!course) { // コースの指定がない場合
+      o.selected_course = "";
+      o.forgotten_files = [];
+      o.msg = 'ERROR! course is not specified.';
+      res.render('admin/checkup',o);
+      return;
+    }
+    o.selected_course = course;
+    o.forgotten_files = [];
+    const excercises = await rg.colExcercises.find({course}).sort({label:1}).toArray();
+    const students = await rg.colStudents.find({course}).sort({account:1}).toArray();
+    for (s of students) {
+      for (e of excercises) {
+        let the_path = rg.config.files.root;
+        the_path = path.join(the_path,rg.config.identity.classifier(s.account));
+        the_path = path.join(the_path,s.account);
+        the_path = path.join(the_path,e.submit);
+        const stats = await stat(the_path);
+        if (!stats)
+          continue;
+        const mark = await rg.colMarks.findOne({excercise:e._id,student:s.account});
+        if (mark)
+          if (mark.status!=='unsubmitted')
+            continue;
+        o.forgotten_files.push(the_path);
+        const new_m = {
+          status:'submitted',
+          mark:0,
+          feedbacks:[]
+        };
+        await rg.colMarks.updateOne({excercise:e._id,student:s.account},{$set:new_m},{upsert:true});
+      }
+    }
+    o.msg = 'These files are detected and fix marks.';
+    res.render('admin/checkup',o);
   });
 
 
