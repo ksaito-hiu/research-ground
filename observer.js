@@ -40,6 +40,20 @@ const init = function(rg) {
         }
       }
     } else if (data.action==='file_remove') {
+      const courses = await colStudents.find({account:uid}).toArray();
+      for (c of courses) {
+        const e = await colExcercises.findOne({course: c.course, submit:data.path});
+        if (e) {
+          const m = await colMarks.findOne({excercise:e._id,student:uid});
+          if (m) {
+            m.status = 'removed';
+            await colMarks.updateOne({excercise:e._id,student:uid},{$set:m});
+          } else {
+            // 通常ありえない
+          }
+          break;
+        }
+      }
     }
   }
 };

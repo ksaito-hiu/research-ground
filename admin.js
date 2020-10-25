@@ -750,19 +750,31 @@ const init = async function(rg) {
         if (!stats)
           continue;
         const mark = await rg.colMarks.findOne({excercise:e._id,student:s.account});
-        if (mark)
-          if (mark.status!=='unsubmitted')
-            continue;
-        o.forgotten_files.push(the_path);
+        if (mark) {
+          if (mark.status==='unsubmitted') {
+            o.forgotten_files.push(the_path + " unsubmitted -> submitted");
+          } else if (mark.status==='submitted') {
+            // 何もしない
+          } else if (mark.status==='marked') {
+            // 何もしない
+          } else if (mark.status==='resubmitted') {
+            // 何もしない
+          } else if (mark.status==='removed') {
+            o.forgotten_files.push(the_path + " removed -> resubmitted");
+          }
+        } else {
+          o.forgotten_files.push(the_path + " none -> submitted");
+        }
       }
     }
     o.msg = 'The course is selected.';
     res.render('admin/checkup',o);
   });
-  // remove状態のmarkについては迷ったので、ファイルがあっても
-  // 手をつけないことにした。unsubmitted状態のmarkはないはずだけど
-  // これについては採点結果、フィードバックともリセットしてsubmitted
-  // の状態になる。
+  // submitted,marked,resubmittedに関しては何もしない
+  // unsubmittedは今の実装ではありえないけど、点数やフィードバックは
+  // 残してsubmittedに、removeedは、点数やフィードバック残して
+  // resubmittedにする。ファイルが無かった場合は当然新しく
+  // submittedの状態にする。
   router.get('/checkup_fix',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
     const course = req.query.course;
@@ -800,16 +812,40 @@ const init = async function(rg) {
         if (!stats)
           continue;
         const mark = await rg.colMarks.findOne({excercise:e._id,student:s.account});
-        if (mark)
-          if (mark.status!=='unsubmitted')
-            continue;
-        o.forgotten_files.push(the_path);
-        const new_m = {
-          status:'submitted',
-          mark:0,
-          feedbacks:[]
-        };
-        await rg.colMarks.updateOne({excercise:e._id,student:s.account},{$set:new_m},{upsert:true});
+        if (mark) {
+          if (mark.status==='unsubmitted') {
+            // 今の実装ではありえないけど一応
+            const update_m = {
+              status:'submitted',
+              mark:0,
+              feedbacks:[]
+            };
+            await rg.colMarks.updateOne({excercise:e._id,student:s.account},{$set:update_m});
+            o.forgotten_files.push(the_path + " unsubmitted -> submitted");
+          } else if (mark.status==='submitted') {
+            // 何もしない
+          } else if (mark.status==='marked') {
+            // 何もしない
+          } else if (mark.status==='resubmitted') {
+            // 何もしない
+          } else if (mark.status==='removed') {
+            const update_m = {
+              status:'resubmitted',
+            };
+            await rg.colMarks.updateOne({excercise:e._id,student:s.account},{$set:update_m});
+            o.forgotten_files.push(the_path + " removed -> resubmitted");
+          }
+        } else {
+          const new_m = {
+            excercise:e._id,
+            student:s.account,
+            status:'submitted',
+            mark:0,
+            feedbacks:[]
+          };
+          await rg.colMarks.insertOne(new_m);
+          o.forgotten_files.push(the_path + " none -> submitted");
+        }
       }
     }
     o.msg = 'These files are detected and fix marks.';

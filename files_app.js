@@ -331,7 +331,7 @@ const init = async function(rg) {
       msg += await makeDir(the_path);
       const utime = new Date().getTime();
       const dirPath = uid+current_path+dir;
-      await rg.colActions.insertOne({type:'mkdir',utime,"path":dirPath});
+      rg.observer(uid,'mkdir',{'path':dirPath});
     } catch (err) {
       msg += err;
     }
@@ -370,32 +370,36 @@ const init = async function(rg) {
       rments = [req.query.rment];
     let ps = [];
     const utime = new Date().getTime();
-    const actions = [];
     for (rment of rments) {
       for (f of files) {
         if (rment === f.name) {
           if (f.isDirectory()) {
             const dir = rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path+rment;
             ps.push(removeDir(dir));
-            const dirPath = uid+current_path+rment;
-            actions.push({type:'rmdir',utime,"path":dirPath});
           } else {
             const rmFile = rg.config.files.root+rg.config.identity.classifier(uid)+uid+current_path+rment;
             ps.push(removeFile(rmFile));
-            const rmFilePath = uid+current_path+rment;
-            actions.push({type:'rm',utime,"path":rmFilePath});
           }
           break;
         }
       }
     }
-    await rg.colActions.insertMany(actions);
     let msg;
     try {
       ps = await Promise.all(ps);
       msg = 'Removed files are ...';
       for (rment of ps) {
         msg += rment + ",";
+        for (f of files) {
+          if (path.basename(rment) === f.name) {
+            const the_path = current_path+path.basename(rment);
+            if (f.isDirectory()) {
+              rg.observer(uid,'dir_remove',{'path':the_path});
+            } else {
+              rg.observer(uid,'file_remove',{'path':the_path});
+            }
+          }
+        }
       }
     } catch(e) {
       console.log(e);
@@ -464,7 +468,7 @@ const init = async function(rg) {
       if (!!stats && stats.isDirectory()) {
         if (r_path.endsWith('/')) {
           await makeDir(r_path);
-          //rg.observer(uid,'make_dir',{dirPath});
+          rg.observer(uid,'mkdir',{'path':r_path});
           res.json({ok: true});
         } else {
           //req.fileがアップされたファイルの情報
