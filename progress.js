@@ -55,22 +55,42 @@ const init = async function(rg) {
         o.regist_attention = false;
       o.excercises = await rg.colExcercises.find({course:o.course}).sort({label:1}).toArray();
       o.marks = [];
-      o.total = 0;
-      o.perfect = 0;
+      let total = 0;
+      let perfect = 0;
+      o.mark0 = 0;
+      o.mark1 = 0;
+      o.mark2 = 0;
+      o.unsubmitted = 0;
+      o.submitted = 0;
+      o.marked = 0;
+      o.resubmitted = 0;
+      o.removed = 0;
       for (const e of o.excercises) {
-        o.perfect += Number(e.point);
+        perfect += Number(e.point)*Number(e.weight);
         const m = await rg.colMarks.findOne({excercise:e._id,student:uid});
         if (m) {
           o.marks.push(m);
-          o.total += Number(m.mark);
+          total += Number(m.mark)*Number(e.weight);
+          if (m.mark==='0') o.mark0 += 1;
+          else if (m.mark==='1') o.mark1 += 1;
+          else if (m.mark==='2') o.mark2 += 1;
+          if (m.status==='unsubmitted') o.unsubmitted += 1;
+          else if (m.status==='submitted') o.submitted += 1;
+          else if (m.status==='marked') o.marked += 1;
+          else if (m.status==='resubmitted') o.resubmitted += 1;
+          else if (m.status==='removed') o.removed += 1;
+        } else {
+          o.unsubmitted += 1;
         }
       }
+      o.score = Math.floor(100.0*(total/perfect));
     } else {
       o.excercises = [];
       o.marks = [];
-      o.total = 0;
-      o.perfect = 0;
       o.regist_attention = false;
+      o.mark0=o.mark1=o.mark2=0;
+      o.unsubmitted=o.submitted=o.marked=o.resubmitted=o.removed=0;
+      o.score = 0.0;
     }
     o.msg = "Progress.";
     res.render('progress/progress',o);

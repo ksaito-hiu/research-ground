@@ -373,15 +373,35 @@ const init = async function(rg) {
       o.course = "";
       o.excercises = [];
       o.students = [];
+      o.unsubmitted=o.submitted=o.marked=o.resubmitted=o.removed=0;
       o.msg = "At first, select the course.";
     } else {
       o.course = course;
       o.excercises = await colExcercises.find({course}).sort({label:1}).toArray();
       o.students = await colStudents.find({course}).sort({account:1}).toArray();
       o.marks = {};
+      o.unsubmitted=o.excercises.length * o.students.length; // カウントダウンする方針で
+      o.submitted=o.marked=o.resubmitted=o.removed=0;
       for (const e of o.excercises) {
         const ms = await colMarks.find({excercise:e._id}).toArray();
         o.marks[e.label] = ms;
+        for (m of ms) {
+          if (m.status==='unsubmitted') {
+            ;
+          } else if (m.status==='submitted') {
+            o.submitted += 1;
+            o.unsubmitted -= 1;
+          } else if (m.status==='marked') {
+            o.marked += 1;
+            o.unsubmitted -= 1;
+          } else if (m.status==='resubmitted') {
+            o.resubmitted += 1;
+            o.unsubmitted -= 1;
+          } else if (m.status==='removed') {
+            o.removed += 1;
+            o.unsubmitted -= 1;
+          }
+        }
       }
       o.submit_root=rg.config.server.mount_path+'files/';
       o.marking_url=rg.config.server.mount_path+'marking/marking';
