@@ -218,6 +218,25 @@ JavaScriptで入れた。一旦入れて採点始めたら不用意に消すと�
     // 状態である。状態に入れられるのはunsubmitted, submitted, marked, resubmittedのみ
     // もし、条件に合うmarkが見付からない場合は何もしない。
     db.marks.update({ excercise: e._id, student: 's202099999' },{ status: 'submitted' });
+    // 合格してるのに，「合格です。」以外のコメントが付いている場合，
+    // 学生と課題とコメントを表示。(自分のクラスだけ)
+    let es = db.excercises.find({},{_id:1,label:1,course:1}).toArray();
+    let ms = db.marks.find({mark:'2'},{excercise:1,student:1,feedbacks:1,_id:0}).toArray();
+    for (let m of ms) {
+      if (m.feedbacks.length >= 1) {
+        let fb = m.feedbacks[m.feedbacks.length-1];
+        if (fb!=="" && fb!="合格です。") {
+          for (let e of es) {
+            if (e.course!=='E1066_ksaito')
+              continue;
+            if (e._id.equals(m.excercise)) {
+              print(m.student,e.label,fb);
+              break;
+            }
+          }
+        }
+      }
+    }
 
 -----
 
