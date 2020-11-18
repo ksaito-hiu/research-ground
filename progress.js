@@ -66,7 +66,8 @@ const init = async function(rg) {
       o.resubmitted = 0;
       o.removed = 0;
       for (const e of o.excercises) {
-        perfect += Number(e.point)*Number(e.weight);
+        if (e.category!=="総合")
+          perfect += Number(e.point)*Number(e.weight);
         const m = await rg.colMarks.findOne({excercise:e._id,student:uid});
         if (m) {
           o.marks.push(m);
