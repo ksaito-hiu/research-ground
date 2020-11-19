@@ -21,6 +21,21 @@
         z-index: 1;
         background: #bbb;
       }
+      .unsubmitted {
+        background-color: #ffeeee;
+      }
+      .submitted {
+        background-color: #ffcccc;
+      }
+      .marked {
+        background-color: #ccffcc;
+      }
+      .resubmitted {
+        background-color: #ffcccc;
+      }
+      .removed {
+        background-color: #ffccff;
+      }
     </style>
     <script>
       function search() {
@@ -90,12 +105,13 @@
                 <%=s.account%>
               </td>
               <% for (const e of excercises) { %>
-              <td>
-                <% let m = null;
-                  for (const mm of marks[e.label])
-                    if (e._id.equals(mm.excercise) && s.account===mm.student)
-                      m = mm;
-                %>
+              <% let m = null;
+                for (const mm of marks[e.label])
+                  if (e._id.equals(mm.excercise) && s.account===mm.student)
+                    m = mm;
+                const st = m===null?'unsubmitted':m.status;
+              %>
+              <td class="<%=st%>">
                 <% if (m) { %>
                 <span><%-status_jp(m.status)%>:<%=m.mark%>/<%=e.point%></span>
                 <span onclick="alert('<%=m.feedbacks[m.feedbacks.length-1]%>')">FB</span>

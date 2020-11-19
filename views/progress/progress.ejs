@@ -6,6 +6,22 @@
       .excercise {
         border-style: solid;
       }
+      .attention { /* 「注目」(提出したけど0か1点の時) */
+        background-color: #ffaa44;
+      }
+      .caution {   /* 「警戒」(提出してない，など)     */
+        background-color: #ffcccc;
+      }
+      .retention {  /* 「保留」(採点待ち)              */
+        background-color: #ccccff;
+      }
+      .safe {      /* 「安全」(点数が2点だったらOK)    */
+        background-color: #ccffcc;
+      }
+      strong {
+        font-size: 120%;
+        font-weight: bold;
+      }
     </style>
     <script>
       function search() {
@@ -63,13 +79,33 @@
         <!-- <p>ここに、学生の状況に応じて色々メッセージ出したいところ。</p> -->
         <h2>課題ごとの評価</h2>
         <% for (const e of excercises) { %>
-        <div class="excercise">
-          <% let m = null;
-            for (const mm of marks)
-              if (e._id.equals(mm.excercise))
-                m = mm;
-          %>
-          <h2><%=e.label%></h2>
+        <% let m = null;
+          for (const mm of marks)
+            if (e._id.equals(mm.excercise))
+              m = mm;
+          let st;
+          if (m===null)
+            st = 'caution';
+          else {
+            if (m.status==='marked')
+              if (m.mark==='2')
+                st = 'safe';
+              else
+                st = 'attention';
+            else if (m.status==='submitted')
+              st = 'retention';
+            else if (m.status==='resubmitted')
+              st = 'retention';
+            else if (m.status==='unsubmitted')
+              st = 'caution';
+            else if (m.status==='removed')
+              st = 'caution';
+            else
+              st = 'caution'; // ???
+          }
+        %>
+        <div class="excercise <%=st%>">
+          <p><strong><%=e.label%></strong></p>
           <% if (m) { %>
             <p>状態: <%=status_jp(m.status)%></p>
             <p>点数: <%=m.mark%>/<%=e.point%></p>
