@@ -405,13 +405,78 @@ const init = async function(rg) {
       }
       o.submit_root=rg.config.server.mount_path+'files/';
       o.marking_url=rg.config.server.mount_path+'marking/marking';
+      o.csv_url=rg.config.server.mount_path+'marking/csv';
       o.classifier = rg.config.identity.classifier; // aaaaa
       o.msg = `Statistics of ${course}.`;
     }
     res.render('marking/statistics',o);
   });
 
+  router.get("/csv",loginCheck,async (req, res) => {
+    const uid = req.session.uid;
+    const course = req.query.course;
+    
+    // コースの情報無しだったらエラー
+    if (!course) {
+      o.msg = "You have to specify the course.";
+      res.render('error',o);
+      return;
+    }
+    // コースの情報を含めて権限が無い場合の応答
+    if (!isAdmin(uid) && !(await isTeacher(uid,course))) {
+      o.msg = "You do not have permission to download the CSV file.";
+      res.render('error',o);
+      return;
+    }
 
+    let csv = '';
+    const excercises = await colExcercises.find({course}).sort({label:1}).toArray();
+    const students = await colStudents.find({course}).sort({account:1}).toArray();
+    const marks = {};
+    for (const e of excercises) {
+      csv += `,${e.label}`;
+    }
+    csv += '\n';
+    csv += 'category';
+    for (const e of excercises) {
+      csv += `,${e.category}`;
+    }
+    csv += '\n';
+    csv += '満点';
+    for (const e of excercises) {
+      csv += `,${e.point}`;
+    }
+    csv += '\n';
+    csv += '重み';
+    for (const e of excercises) {
+      csv += `,${e.weight}`;
+    }
+    csv += '\n';
+    for (const s of students) {
+      csv += `${s.account}`;
+      for (const e of excercises) {
+        const m = await colMarks.findOne({excercise:e._id,student:s.account});
+        if (!!m) {
+          csv += `,${m.mark}`;
+        } else {
+          csv += ',0';
+        }
+      }
+      csv += '\n';
+    }
+
+    const date = new Date();
+    let time = '';
+    time += date.getFullYear();
+    time += ('0'+(date.getMonth()+1)).slice(-2);
+    time += ('0'+date.getDate()).slice(-2);
+    time += ('0'+date.getHours()).slice(-2);
+    time += ('0'+date.getMinutes()).slice(-2);
+    const filename = `marks-${course}-${time}.csv`
+    res.setHeader('Content-disposition',`attachment; filename=${filename}`);
+    res.setHeader('Content-type', 'text/csv; charset=UTF-8');
+    res.send(csv);
+  });
 
 
 
