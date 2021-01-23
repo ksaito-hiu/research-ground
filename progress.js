@@ -37,6 +37,19 @@ const init = async function(rg) {
     if (req.session.admin && req.query.uid) {
       uid = req.query.uid;
     }
+    //###########################################################################
+    //## 2021,01/24: DBの中の重みを無視して以下の配点調整設定で得点を計算する  ##
+    //## ように変更。これにより合計点数は100点ではなくなっている。また問題のカ ##
+    //## テゴリが'基本'，'応用'，'総合'であることを前提にしてあって汎用性も    ##
+    //## なくなっている。                                                      ##
+    //###########################ここで配点の調整を行う##########################
+    const kihon = 60.0;  // 基本問題の配点
+    const ouyou = 40.0;  // 応用問題の配点
+    const sougou = 20.0; // 総合問題の配点
+    //const kihon = 80.0;  // 基本問題の配点
+    //const ouyou = 40.0;  // 応用問題の配点
+    //const sougou = 20.0; // 総合問題の配点
+    //###########################################################################
     const o = {}; // ejsにわたすデーター
     o.baseUrl = rg.config.server.mount_path;
     o.admin = req.session.admin;
@@ -55,8 +68,12 @@ const init = async function(rg) {
         o.regist_attention = false;
       o.excercises = await rg.colExcercises.find({course:o.course}).sort({label:1}).toArray();
       o.marks = [];
-      let total = 0;
-      let perfect = 0;
+      let total1 = 0; // 基本問題の得点
+      let total2 = 0; // 応用問題の得点
+      let total3 = 0; // 総合問題の得点
+      let perfect1 = 0; // 基本問題の満点
+      let perfect2 = 0; // 応用問題の満点
+      let perfect3 = 0; // 総合問題の満点
       o.mark0 = 0;
       o.mark1 = 0;
       o.mark2 = 0;
@@ -66,12 +83,21 @@ const init = async function(rg) {
       o.resubmitted = 0;
       o.removed = 0;
       for (const e of o.excercises) {
-        if (e.category!=="総合")
-          perfect += Number(e.point)*Number(e.weight);
+        if (e.category === '基本')
+          perfect1 += Number(e.point)*Number(e.weight);
+        else if (e.category === '応用')
+          perfect2 += Number(e.point)*Number(e.weight);
+        else if (e.category === '総合')
+          perfect3 += Number(e.point)*Number(e.weight);
         const m = await rg.colMarks.findOne({excercise:e._id,student:uid});
         if (m) {
           o.marks.push(m);
-          total += Number(m.mark)*Number(e.weight);
+          if (e.category === '基本')
+            total1 += Number(m.mark)*Number(e.weight);
+          else if (e.category === '応用')
+            total2 += Number(m.mark)*Number(e.weight);
+          else if (e.category === '総合')
+            total3 += Number(m.mark)*Number(e.weight);
           if (m.mark==='0') o.mark0 += 1;
           else if (m.mark==='1') o.mark1 += 1;
           else if (m.mark==='2') o.mark2 += 1;
@@ -84,7 +110,8 @@ const init = async function(rg) {
           o.unsubmitted += 1;
         }
       }
-      o.score = Math.floor(100.0*(total/perfect));
+      o.score = kihon*(total1/perfect1) + ouyou*(total2/perfect2) + sougou*(total3/perfect3);
+      o.perfect = kihon + ouyou + sougou;
     } else {
       o.excercises = [];
       o.marks = [];
@@ -92,6 +119,7 @@ const init = async function(rg) {
       o.mark0=o.mark1=o.mark2=0;
       o.unsubmitted=o.submitted=o.marked=o.resubmitted=o.removed=0;
       o.score = 0.0;
+      o.perfect = kihon + ouyou + sougou;
     }
     o.msg = "Progress.";
     res.render('progress/progress',o);
