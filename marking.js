@@ -379,13 +379,20 @@ const init = async function(rg) {
       o.course = course;
       o.excercises = await colExcercises.find({course}).sort({label:1}).toArray();
       o.students = await colStudents.find({course}).sort({account:1}).toArray();
+      let student_ids = [];
+      for (const s of o.students) {
+        student_ids.push(s.account);
+      }
       o.marks = {};
       o.unsubmitted=o.excercises.length * o.students.length; // カウントダウンする方針で
       o.submitted=o.marked=o.resubmitted=o.removed=0;
       for (const e of o.excercises) {
         const ms = await colMarks.find({excercise:e._id}).toArray();
-        o.marks[e.label] = ms;
-        for (m of ms) {
+        o.marks[e.label] = [];
+        for (m of ms)
+          if (student_ids.includes(m.student))
+            o.marks[e.label].push(m);
+        for (m of o.marks[e.label]) {
           if (m.status==='unsubmitted') {
             ;
           } else if (m.status==='submitted') {
