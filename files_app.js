@@ -58,7 +58,7 @@ const init = async function(rg) {
   const dirIndex = async function(req,res,next) {
     const the_path = rg.config.files.root + req.path;
     const stats = await stat(the_path);
-    if (!!stats && stats.isDirectory()) {
+    if (!!stats && stats.isDirectory()) { // ここの判定はシンボリックリンクでもOKっぽい
       if (req.accepts(['html', 'json'])==='json') {
         const files = await readdir(the_path);
         res.json({files});
@@ -105,14 +105,24 @@ const init = async function(rg) {
   }
 
   // フォルダの中一覧を非同期でゲット
+  // シンボリックリンクもリンク先の属性で
+  // 取得したいのだが、ただのfs.readdirの
+  // withFileTypes:trueではうまくいかなかったので
+  // 以下のようにした。
   async function readdir(dir) {
-    return new Promise((resolve,reject)=>{
-      fs.readdir(dir,{withFileTypes: true},(err,dirents) => {
+    return new Promise((resolve,reject) => {
+      fs.readdir(dir,{},async function(err,dirents) {
         if (err) {
           reject(err);
           return;
         }
-        resolve(dirents);
+        const files = [];
+        for (let e of dirents) {
+          const f = await stat(path.join(dir,e));
+          f.name = e; // 無理矢理追加
+          files.push(f);
+        }
+        resolve(files);
       });
     });
   }

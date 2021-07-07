@@ -20,12 +20,18 @@ const init = function(rg) {
     if (data.action==='file_upload') {
       const courses = await colStudents.find({account:uid}).toArray();
       for (c of courses) {
-        const e = await colExcercises.findOne({course: c.course, submit:data.path});
-        if (e) {
+        const es = await colExcercises.find({course: c.course, submit:data.path}).toArray();
+        for (let e of es) {
           const m = await colMarks.findOne({excercise:e._id,student:uid});
           if (m) {
-            m.status = 'resubmitted';
-            await colMarks.updateOne({excercise:e._id,student:uid},{$set:m});
+            if (m.status==='marked' && m.mark>=e.point) {
+              // この場合は状態を書き換えない。
+              // 複数の課題で提出ファイルが同じパターン(課題を
+              // 発展さていくような課題)を想定した対処
+            } else {
+              m.status = 'resubmitted';
+              await colMarks.updateOne({excercise:e._id,student:uid},{$set:m});
+            }
           } else {
             const new_m = {
               excercise:e._id,
@@ -36,7 +42,6 @@ const init = function(rg) {
             };
             await colMarks.insertOne(new_m);
           }
-          break;
         }
       }
     } else if (data.action==='file_remove') {
