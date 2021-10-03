@@ -37,12 +37,12 @@
         <p>Message: <%=msg%></p>
         <p>Course IDs:
           <select id="courses">
-            <option value="">select for search</options>
+            <option value="">select for search</option>
             <% for (c of courses) { %>
               <% if (c.id===selected_course) { %>
-                <option value="<%= c.id %>" selected="true"><%= c.id %></options>
+                <option value="<%= c.id %>" selected="true"><%= c.id %></option>
               <% } else { %>
-                <option value="<%= c.id %>"><%= c.id %></options>
+                <option value="<%= c.id %>"><%= c.id %></option>
               <% } %>
             <% } %>
           </select></p>

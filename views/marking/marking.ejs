@@ -278,24 +278,24 @@
         <p>Message: <%=msg %></p>
         <p>Courses:
           <select id="courses">
-            <option value="">select for course</options>
+            <option value="">select for course</option>
             <% for (const c of courses) { %>
               <% if (c.id===course) { %>
-                <option value="<%= c.id %>" selected="true"><%= c.name %></options>
+                <option value="<%= c.id %>" selected="true"><%= c.name %></option>
               <% } else { %>
-                <option value="<%= c.id %>"><%= c.name %></options>
+                <option value="<%= c.id %>"><%= c.name %></option>
               <% } %>
             <% } %>
           </select>
         </p>
         <p>Excecise:
           <select id="excercises">
-            <option value="">select for excercise</options>
+            <option value="">select for excercise</option>
             <% for (const e of excercises) { %>
               <% if (e.label===label) { %>
-                <option value="<%= e.label %>" selected="true"><%= e.label %></options>
+                <option value="<%= e.label %>" selected="true"><%= e.label %></option>
               <% } else { %>
-                <option value="<%= e.label %>"><%= e.label %></options>
+                <option value="<%= e.label %>"><%= e.label %></option>
               <% } %>
             <% } %>
           </select>
@@ -315,9 +315,9 @@
           <select id="students">
             <% for (const s of students) { %>
               <% if (s.account===student) { %>
-                <option value="<%= s.account %>" selected="true"><%= s.account %></options>
+                <option value="<%= s.account %>" selected="true"><%= s.account %></option>
               <% } else { %>
-                <option value="<%= s.account %>"><%= s.account %></options>
+                <option value="<%= s.account %>"><%= s.account %></option>
               <% } %>
             <% } %>
           </select>

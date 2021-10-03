@@ -59,12 +59,12 @@
         <p>UID: <%=uid%></p>
         <p><%= __("course") %>:
           <select id="courses">
-            <option value=""><%= __("select_course") %></options>
+            <option value=""><%= __("select_course") %></option>
             <% for (const c of courses) { %>
               <% if (c.id===course) { %>
-                <option value="<%= c.id %>" selected="true"><%= c.name %></options>
+                <option value="<%= c.id %>" selected="true"><%= c.name %></option>
               <% } else { %>
-                <option value="<%= c.id %>"><%= c.name %></options>
+                <option value="<%= c.id %>"><%= c.name %></option>
               <% } %>
             <% } %>
           </select>

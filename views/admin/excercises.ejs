@@ -46,23 +46,23 @@
         <p>Message: <%=msg%></p>
         <p>Course IDs:
           <select id="courses">
-            <option value="">select course</options>
+            <option value="">select course</option>
             <% for (const c of courses) { %>
               <% if (c.id===course) { %>
-                <option value="<%= c.id %>" selected="true"><%= c.id %></options>
+                <option value="<%= c.id %>" selected="true"><%= c.id %></option>
               <% } else { %>
-                <option value="<%= c.id %>"><%= c.id %></options>
+                <option value="<%= c.id %>"><%= c.id %></option>
               <% } %>
             <% } %>
           </select>,
           Excercises:
           <select id="excercises">
-            <option value="">select excercise</options>
+            <option value="">select excercise</option>
             <% for (const e of excercises) { %>
               <% if (e.label===label) { %>
-                <option value="<%= e.label %>" selected="true"><%= e.label %></options>
+                <option value="<%= e.label %>" selected="true"><%= e.label %></option>
               <% } else { %>
-                <option value="<%= e.label %>"><%= e.label %></options>
+                <option value="<%= e.label %>"><%= e.label %></option>
               <% } %>
             <% } %>
           </select>

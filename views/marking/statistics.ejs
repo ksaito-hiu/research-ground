@@ -71,12 +71,12 @@
         <p>Message: <%=msg%></p>
         <p>Course:
           <select id="courses">
-            <option value="">select course</options>
+            <option value="">select course</option>
             <% for (const c of courses) { %>
               <% if (c.id===course) { %>
-                <option value="<%= c.id %>" selected="true"><%= c.name %></options>
+                <option value="<%= c.id %>" selected="true"><%= c.name %></option>
               <% } else { %>
-                <option value="<%= c.id %>"><%= c.name %></options>
+                <option value="<%= c.id %>"><%= c.name %></option>
               <% } %>
             <% } %>
           </select>
