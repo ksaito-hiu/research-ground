@@ -10,6 +10,11 @@
       <main>
         <h1><%= __("title_auth") %></h1>
         <p>Message: <%=msg %></p>
+        <ul>
+          <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>auth/login">ログイン</a></li>
+          <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>auth/logout">ログアウト</a></li>
+        </ul>
+        <hr/>
         <p>ログインが上手くいかない時で、複数のGoogleアカウントやYahoo! JAPAN IDで
           ログインしているような場合は一度全てのアカウントでログアウトしてから試して
           みて下さい。
@@ -19,10 +24,6 @@
           <li><a class="btn wave-effect wave-light" href="https://accounts.yahoo.co.jp/profile" target="_blank">Yahoo! JAPANの登録情報ページでログアウト</a></li>
         </ul>
         <hr/>
-        <ul>
-          <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>auth/login">ログイン</a></li>
-          <li><a class="btn wave-effect wave-light" href="<%=baseUrl %>auth/logout">ログアウト</a></li>
-        </ul>
         <p><a class="btn wave-effect wave-light" href="<%=baseUrl %>"><%= __("back_to_top") %></a></p>
       </main>
     </div>
