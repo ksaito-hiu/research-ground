@@ -231,7 +231,7 @@ const init = async function(rg) {
     if (!selected_course) { // コースが選択されてない場合
       o.selected_course = "";
       o.teachers = [];
-      o.msg = 'At first, select cource id.';
+      o.msg = 'At first, select course id.';
       res.render('admin/teachers',o);
       return;
     }
@@ -317,7 +317,7 @@ const init = async function(rg) {
     if (!selected_course) { // コースが選択されてない場合
       o.selected_course = "";
       o.assistants = [];
-      o.msg = 'At first, select cource id.';
+      o.msg = 'At first, select course id.';
       res.render('admin/assistants',o);
       return;
     }
@@ -426,7 +426,7 @@ const init = async function(rg) {
     if (!selected_course) { // コースが選択されてない場合
       o.selected_course = "";
       o.students = "";
-      o.msg = 'At first, select cource id.';
+      o.msg = 'At first, select course id.';
       res.render('admin/students',o);
       return;
     }
@@ -540,7 +540,7 @@ const init = async function(rg) {
       o.label=label; o.course=course; o.category="";
       o.question=o.submit=o.point="";
       o.weight=o.memo="";
-      o.msg = 'At first, select cource id.'
+      o.msg = 'At first, select course id.'
     }
     res.render('admin/excercises',o);
   });
@@ -566,7 +566,7 @@ const init = async function(rg) {
       o.label=o.course=o.category="";
       o.question=o.submit=o.point="";
       o.weight=o.memo="";
-      o.msg = `You do not have parmission to edit the course(${cource}).`;
+      o.msg = `You do not have parmission to edit the course(${course}).`;
       res.render('admin/excercises',o);
       return;
     }
@@ -725,7 +725,7 @@ const init = async function(rg) {
     o.forgotten_files = [];
     if (!selected_course) { // コースが選択されてない場合
       o.selected_course = "";
-      o.msg = 'At first, select cource id.';
+      o.msg = 'At first, select course id.';
       res.render('admin/checkup',o);
       return;
     }
@@ -749,7 +749,7 @@ const init = async function(rg) {
         const stats = await stat(the_path);
         if (!stats)
           continue;
-        const mark = await rg.colMarks.findOne({excercise:e._id,student:s.account});
+        const mark = await rg.colMarks.findOne({course:e.course,label:e.label,student:s.account});
         if (mark) {
           if (mark.status==='unsubmitted') {
             o.forgotten_files.push(the_path + " unsubmitted -> submitted");
@@ -811,7 +811,7 @@ const init = async function(rg) {
         const stats = await stat(the_path);
         if (!stats)
           continue;
-        const mark = await rg.colMarks.findOne({excercise:e._id,student:s.account});
+        const mark = await rg.colMarks.findOne({course:e.course,label:e.label,student:s.account});
         if (mark) {
           if (mark.status==='unsubmitted') {
             // 今の実装ではありえないけど一応
@@ -820,7 +820,7 @@ const init = async function(rg) {
               mark:0,
               feedbacks:[]
             };
-            await rg.colMarks.updateOne({excercise:e._id,student:s.account},{$set:update_m});
+            await rg.colMarks.updateOne({course:e.course,label:e.label,student:s.account},{$set:update_m});
             o.forgotten_files.push(the_path + " unsubmitted -> submitted");
           } else if (mark.status==='submitted') {
             // 何もしない
@@ -832,12 +832,13 @@ const init = async function(rg) {
             const update_m = {
               status:'resubmitted',
             };
-            await rg.colMarks.updateOne({excercise:e._id,student:s.account},{$set:update_m});
+            await rg.colMarks.updateOne({course:e.course,label:e.label,student:s.account},{$set:update_m});
             o.forgotten_files.push(the_path + " removed -> resubmitted");
           }
         } else {
           const new_m = {
-            excercise:e._id,
+            course:e.course,
+            label:e.label,
             student:s.account,
             status:'submitted',
             mark:0,

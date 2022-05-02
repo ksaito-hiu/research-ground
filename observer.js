@@ -22,7 +22,7 @@ const init = function(rg) {
       for (c of courses) {
         const es = await colExcercises.find({course: c.course, submit:data.path}).toArray();
         for (let e of es) {
-          const m = await colMarks.findOne({excercise:e._id,student:uid});
+          const m = await colMarks.findOne({course:e.course,label:e.label,student:uid});
           if (m) {
             if (m.status==='marked' && m.mark>=e.point) {
               // この場合は状態を書き換えない。
@@ -30,11 +30,12 @@ const init = function(rg) {
               // 発展さていくような課題)を想定した対処
             } else {
               m.status = 'resubmitted';
-              await colMarks.updateOne({excercise:e._id,student:uid},{$set:m});
+              await colMarks.updateOne({course:e.course,label:e.label,student:uid},{$set:m});
             }
           } else {
             const new_m = {
-              excercise:e._id,
+              course:e.course,
+              label:e.label,
               student:uid,
               status:'submitted',
               mark:0,
@@ -49,10 +50,10 @@ const init = function(rg) {
       for (c of courses) {
         const es = await colExcercises.find({course: c.course, submit:data.path}).toArray();
         for (let e of es) {
-          const m = await colMarks.findOne({excercise:e._id,student:uid});
+          const m = await colMarks.findOne({course:e.course,label:e.label,student:uid});
           if (m) {
             m.status = 'removed';
-            await colMarks.updateOne({excercise:e._id,student:uid},{$set:m});
+            await colMarks.updateOne({course:e.course,label:e.label,student:uid},{$set:m});
           } else {
             // 通常ありえない
           }

@@ -107,7 +107,7 @@
               <% for (const e of excercises) { %>
               <% let m = null;
                 for (const mm of marks[e.label])
-                  if (e._id.equals(mm.excercise) && s.account===mm.student)
+                  if (s.account===mm.student)
                     m = mm;
                 const st = m===null?'unsubmitted':m.status;
               %>

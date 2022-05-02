@@ -163,9 +163,9 @@ const init = async function(rg) {
           o.question_url = o.submit_url = "";
           
         }
-        o.feedbacks = await rg.colFeedbacks.find({excercise:o.excercise._id}).sort({count:-1}).toArray();
+        o.feedbacks = await rg.colFeedbacks.find({course:o.excercise.course,label:o.excercise.label}).sort({count:-1}).toArray();
         o.label=label; o.course=course; o.student = student;
-        const marks = await rg.colMarks.find({excercise:o.excercise._id}).sort({student:1}).toArray();
+        const marks = await rg.colMarks.find({course:o.excercise.course,label:o.excercise.label}).sort({student:1}).toArray();
         o.mark = null; // 過去の採点結果
         o.need_mark = 0; // この課題で採点が必要な生徒の数
         o.need_mark_student_no = 0; // この課題で採点が必要な生徒うち何番目か
@@ -260,15 +260,15 @@ const init = async function(rg) {
       return;
     }
     o.excercise = await rg.colExcercises.findOne({course,label});
-    let mark_data = await rg.colMarks.findOne({excercise:o.excercise._id,student});
+    let mark_data = await rg.colMarks.findOne({course:o.excercise.course,lable:o.excercise.label,student});
     if (!mark_data) {
-      mark_data = {excercise:o.excercise._id, student, status:'marked', mark, feedbacks:[feedback]};
+      mark_data = {course:o.excercise.course,label:o.excercise.label, student, status:'marked', mark, feedbacks:[feedback]};
     } else {
       mark_data.status = 'marked';
       mark_data.mark = mark;
       mark_data.feedbacks.push(feedback); // 新しいfeedbackを最後に追加
     }
-    const ret = await rg.colMarks.updateOne({excercise:o.excercise._id,student},{$set:mark_data},{upsert:true});
+    const ret = await rg.colMarks.updateOne({course:o.excercise.course,label:o.excercise.label,student},{$set:mark_data},{upsert:true});
     if (!next_student)
       next_student = student;
     let url = o.baseUrl+'marking/marking';
@@ -280,10 +280,10 @@ const init = async function(rg) {
   });
   router.get('/feedback_reserve',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
-    const excercise_id = req.query.excercise_id;
+    const course = req.query.course;
+    const label = req.query.label;
     const feedback = decodeURIComponent(req.query.feedback);
-    const e = await colExcercises.findOne({_id: new mongo.ObjectID(excercise_id)});
-    const course = e.course;
+    const e = await colExcercises.findOne({course,label});
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
     if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
       res.json({result:'error'});
@@ -294,8 +294,7 @@ const init = async function(rg) {
       res.json({result:'error'});
       return;
     }
-    const eid = new mongo.ObjectID(excercise_id);
-    const data = {excercise:eid,feedback,count:1};
+    const data = {course,label,feedback,count:1};
     const ret = await rg.colFeedbacks.insertOne(data);
     if (ret.insertedCount===1) {
       res.json({result:'ok',feedback_id:ret.insertedId,feedback});
@@ -310,7 +309,7 @@ const init = async function(rg) {
     const feedback_id = req.query.feedback_id;
     const fid = new mongo.ObjectID(feedback_id);
     const f = await colFeedbacks.findOne({_id: fid});
-    const e = await colExcercises.findOne({_id:f.excercise});
+    const e = await colExcercises.findOne({course:f.course,label:f.label});
     const course = e?e.course:'';
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
     if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
@@ -335,7 +334,7 @@ const init = async function(rg) {
     const uid = req.session.uid;
     const feedback_id = req.query.feedback_id;
     const f = await colFeedbacks.findOne({_id: new mongo.ObjectId(feedback_id)});
-    const e = await colExcercises.findOne({_id:f.excercise});
+    const e = await colExcercises.findOne({course:f.course,label:f.label});
     const course = e.course;
     // コースの情報無しの状態でも権限が無いと判断できる場合の応答
     if (!course && !isAdmin(uid) && !(await isTeacher(uid,null)) && !(await isAssistant(uid,null))) {
@@ -387,7 +386,7 @@ const init = async function(rg) {
       o.unsubmitted=o.excercises.length * o.students.length; // カウントダウンする方針で
       o.submitted=o.marked=o.resubmitted=o.removed=0;
       for (const e of o.excercises) {
-        const ms = await colMarks.find({excercise:e._id}).toArray();
+        const ms = await colMarks.find({course:e.course,label:e.label}).toArray();
         o.marks[e.label] = [];
         for (m of ms)
           if (student_ids.includes(m.student))
@@ -462,7 +461,7 @@ const init = async function(rg) {
     for (const s of students) {
       csv += `${s.account}`;
       for (const e of excercises) {
-        const m = await colMarks.findOne({excercise:e._id,student:s.account});
+        const m = await colMarks.findOne({course:e.course,lable:e.label,student:s.account});
         if (!!m) {
           csv += `,${m.mark}`;
         } else {

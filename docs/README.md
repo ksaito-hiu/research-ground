@@ -103,7 +103,8 @@ mongoのCUIでは以下のようにすれば作れるらしい。
     + format: `{ account: 's202099999', course: 'E1066_ksaito' }`
 * 課題情報
     + Collection name: excercises
-    + 自動で付けられるID
+    + (自動で付けられるID これは使わないことにする)
+    + 何の科目の課題か
     + ラベル
         + 半角英数で10文字ぐらいの文字列を推奨。
           記号は、アンダーバー、ハイフンぐらいに
@@ -111,7 +112,6 @@ mongoのCUIでは以下のようにすれば作れるらしい。
         + この文字列で辞書順にソートすると自然な
           順番(出題順など)に並ぶようにすること推奨
         + 例えば「map01_02」など
-    + 何の科目の課題か
     + 課題の出題場所のURL
     + 課題の提出場所のパス
         - https://...../research-ground/files/ の後に、
@@ -123,16 +123,17 @@ mongoのCUIでは以下のようにすれば作れるらしい。
     + カテゴリ(任意の文字列)
         - 必須課題、応用課題とかを意図。
     + メモ(説明とか。本当に任意)
-    + format: `{ _id: '???', label: 'map01_01', course: 'E1066_ksaito', no: '01', sub_no: '01', question: 'https://s314.do-johodai.ac.jp/map/01/map01_01.html', submit: '/map/01/map01_01.html', category: '必須', point: 2, weight: 5, memo:'' }`
+    + format: `{ _id: '???', course: 'E1066_ksaito', label: 'map01_01', question: 'https://s314.do-johodai.ac.jp/map/01/map01_01.html', submit: '/map/01/map01_01.html', category: '必須', point: 2, weight: 5, memo:'' }`
 * 評価(採点)の管理(課題と学生の組に対して)
     + Collection name: marks
     + 自動で付けられるID
-    + 評価対象の課題のID
+    + 評価対象の課題の科目ID
+    + 評価対象の課題のラベル
     + 学生アカウント
     + 課題の状態(未提出:unsubmitted、提出:submitted、採点済み:marked、再提出:resubmitted、削除:remoed)
     + 評価(現在の評価。0以上、配点以下)
     + 過去のフィードバック(コメント)の配列(消さないで蓄積して残しておきたい)
-    + format: `{ _id: '???', excercise: '???', student: 's202099999', status: 'submitted', mark: 2, feedbacks: ['', '○△□ができていません。']  }`
+    + format: `{ _id: '???', course: 'E1066_ksaito', label: 'map01_01', student: 's202099999', status: 'submitted', mark: 2, feedbacks: ['', '○△□ができていません。']  }`
 * フィードバック(コメント)の管理
   (フィードバックの文章を使い回すための物)
     + Collection name: feedbacks
@@ -140,7 +141,7 @@ mongoのCUIでは以下のようにすれば作れるらしい。
     + 対象とする課題のID
     + フィードバック(コメント)の文面
     + 採用回数
-    + format: `{ _id: '???', excercise: '???' , feedback: '○△□ができていません。', count: 2 }`
+    + format: `{ _id: '???', course: 'E1066_ksaito', label: 'map01_01', feedback: '○△□ができていません。', count: 2 }`
 
 -----
 
@@ -254,3 +255,8 @@ JavaScriptで入れた。一旦入れて採点始めたら不用意に消すと�
   そのページを開くURLのクエリ文字列に`uid=??????????`を
   追加することで他のユーザーの情報を表示させられる。
   ただし、システム管理者のみ。
+
+2022,05/02: 課題(excercise)を参照する時に、MongoDBが
+自動に付けるIDではなく、courceとlabelを使用するように
+変更する。さらに、excerciseにnoとsubnoというのが
+あったけど使ってないので削除。
