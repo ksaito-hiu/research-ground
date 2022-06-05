@@ -257,6 +257,6 @@ JavaScriptで入れた。一旦入れて採点始めたら不用意に消すと�
   ただし、システム管理者のみ。
 
 2022,05/02: 課題(excercise)を参照する時に、MongoDBが
-自動に付けるIDではなく、courceとlabelを使用するように
+自動に付けるIDではなく、courseとlabelを使用するように
 変更する。さらに、excerciseにnoとsubnoというのが
 あったけど使ってないので削除。

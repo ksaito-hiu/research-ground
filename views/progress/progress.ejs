@@ -81,7 +81,7 @@
         <% for (const e of excercises) { %>
         <% let m = null;
           for (const mm of marks)
-            if (e._id.equals(mm.excercise))
+            if (e.cource===mm.cource && e.label===mm.label)
               m = mm;
           let st;
           if (m===null)
@@ -106,6 +106,7 @@
         %>
         <div class="excercise <%=st%>">
           <p><strong><%=e.label%></strong></p>
+          <div>注意点: <%=e.memo%></div>
           <% if (m) { %>
             <p>状態: <%=status_jp(m.status)%></p>
             <p>点数: <%=m.mark%>/<%=e.point%></p>

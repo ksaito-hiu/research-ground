@@ -164,7 +164,7 @@ const init = async function(rg) {
       o.removed = 0;
       for (const e of o.excercises) {
         perfect += Number(e.point)*Number(e.weight);
-        const m = await rg.colMarks.findOne({excercise:e._id,student:uid});
+        const m = await rg.colMarks.findOne({course:e.course, label:e.label,student:uid});
         if (m) {
           o.marks.push(m);
           total += Number(m.mark)*Number(e.weight);
@@ -181,8 +181,8 @@ const init = async function(rg) {
           o.unsubmitted += 1;
         }
       }
-      o.score = total;
-      o.perfect = perfect;
+      o.score = Math.round(total);
+      o.perfect = Math.round(perfect);
     } else {
       o.excercises = [];
       o.marks = [];
