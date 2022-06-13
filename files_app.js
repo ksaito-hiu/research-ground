@@ -271,6 +271,10 @@ const init = async function(rg) {
       next();
       return;
     }
+    if (await isTeacher(req.session.uid)) { // 先生もOK GAHA
+      next();
+      return;
+    }
     if (await isAssistant(req.session.uid)) { // SAもOK GAHA
       next();
       return;
