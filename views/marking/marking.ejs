@@ -187,8 +187,8 @@
       async function add_fb_example() {
         const fb = encodeURIComponent(document.querySelector("#fb_textarea").value);
         let url = '<%=baseUrl%>marking/feedback_reserve';
-        url += '?cource=<%=excercise.cource%>';
-        url += '?label=<%=excercise.label%>';
+        url += '?course=<%=excercise.course%>';
+        url += '&label=<%=excercise.label%>';
         url += `&feedback=${fb}`;
         const r = await fetch(url);
         const reserved = await r.json();
