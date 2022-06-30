@@ -260,3 +260,130 @@ JavaScriptで入れた。一旦入れて採点始めたら不用意に消すと�
 自動に付けるIDではなく、courseとlabelを使用するように
 変更する。さらに、excerciseにnoとsubnoというのが
 あったけど使ってないので削除。
+
+2022,06/30: データを書き換える必要が出てきた。これを機に
+DBの構造を整理して書いておこう。
+
+    > use research_ground;
+    > show collections;
+    actions
+    assistants
+    courses
+    excercises
+    feedbacks
+    marks
+    students
+    teachers
+    > db.actions.findOne({});
+    {
+            "_id" : ObjectId("626f871e60f0040fdeb6509d"),
+            "type" : "login",
+            "utime" : 1651476254634,
+            "uid" : "s202231929"
+    }
+    > db.assistants.findOne({});
+    {
+            "_id" : ObjectId("629c4a225aef86160cdfb322"),
+            "account" : "s201921020",
+            "course" : "E1127_1"
+    }
+    > db.courses.findOne({});
+    {
+            "_id" : ObjectId("629c496f5aef86160cdfb2dd"),
+            "id" : "E1127_1",
+            "name" : "HTMLコーディング演習(斎藤一先生-月)"
+    }
+    > db.excercises.findOne({});
+    {
+            "_id" : ObjectId("629c4b05db1979b1b319dc16"),
+            "label" : "hcp01_00",
+            "category" : "必須",
+            "question" : "https://s314.do-johodai.ac.jp/hcp/",
+            "submit" : "/html/chap01/start.html",
+            "point" : 3,
+            "weight" : 3,
+            "memo" : "上手く提出できてるか自分でも確認すること",
+            "course" : "E1127_1"
+    }
+    > db.feedbacks.findOne({}); // 以下の例はcourse,labelともnullで最初ダメだった時のデータ
+    {
+            "_id" : ObjectId("62a7e7da1bc8eb02e49e72e0"),
+            "course" : null,
+            "label" : null,
+            "feedback" : "リスト（箇条書き）のタグは<li>です。SAさんに確認してもらって修正しましょう。",
+            "count" : 1
+    }
+    > db.marks.findOne({});
+    {
+            "_id" : ObjectId("62a6eb2938fb4902e780a6b0"),
+            "course" : "E1127_1",
+            "label" : "hcp01_00",
+            "student" : "s201921184",
+            "status" : "marked",
+            "mark" : "3",
+            "feedbacks" : [
+                    ""
+            ]
+    }
+    > db.students.findOne({});
+    {
+            "_id" : ObjectId("629c4cbbd2437a769216c6ea"),
+            "account" : "s201622028",
+            "course" : "E1127_1"
+    }
+    > db.teachers.findOne({});
+    {
+            "_id" : ObjectId("629c49e05aef86160cdfb300"),
+            "account" : "f200188011",
+            "course" : "E1127_1"
+    }
+
+2022,07/01: DBの構造を整理した所で、今回の依頼を整理。
+
+* 課題`hcp03_03_02`を削除。
+* 課題`hcp03_03_03`を`hcp03_03_01`に改名。
+  さらに重みを1から1.5に変更。
+* 課題`hcp03_03_04`を`hcp03_03_02`に改名。
+  さらに重みを1から1.5に変更。
+
+これ、この前にやった変更が裏目に出る結果になっちゃってて、
+学生が課題を提出してたり、採点されてたり、フィードバック
+コメントが保存されるようなことが大量に起ってからだったら
+面倒なことになっていた。でも、1人の学生がfaculty.htmlと
+contact.htmlの2つの課題を提出して、数分後にすぐに消した
+という記録だけが残っていた。無視してもいいレベルなので、
+課題のデータをちょろっと書き換えて終りでも良いのだが、
+ここは完全に変更しておこう。
+
+まずは、念のため以下のクエリで確認。
+
+    > db.feedbacks.find({label: 'hcp03_03_02'});
+    > db.feedbacks.find({label: 'hcp03_03_03'});
+    > db.feedbacks.find({label: 'hcp03_03_04'});
+    > db.marks.find({label: 'hcp03_03_02'});
+    > db.marks.find({label: 'hcp03_03_03'});
+    { "_id" : ObjectId("62bd4c4b7a9cba3a4c130ff9"), "course" : "E1127_4", "label" : "hcp03_03_03", "student" : "s202221238", "status" : "removed", "mark" : 0, "feedbacks" : [ ] }
+    > db.marks.find({label: 'hcp03_03_04'});
+    { "_id" : ObjectId("62bd4c4b7a9cba3a4c130ffa"), "course" : "E1127_4", "label" : "hcp03_03_04", "student" : "s202221238", "status" : "removed", "mark" : 0, "feedbacks" : [ ] }
+
+想定通り。ということは以下のコマンドで終り。
+
+    > db.excercises.remove({label:'hcp03_03_02'});
+    WriteResult({ "nRemoved" : 4 })
+    > db.excercises.update({label:'hcp03_03_03'},{$set: {label:'hcp03_03_01'}},{multi:true});
+    WriteResult({ "nMatched" : 4, "nUpserted" : 0, "nModified" : 4 })
+    > db.excercises.update({label:'hcp03_03_01'},{$set: {weight:1.5}},{multi:true});
+    WriteResult({ "nMatched" : 4, "nUpserted" : 0, "nModified" : 4 })
+    > db.excercises.update({label:'hcp03_03_04'},{$set: {label:'hcp03_03_02'}},{multi:true});
+    WriteResult({ "nMatched" : 4, "nUpserted" : 0, "nModified" : 4 })
+    > db.excercises.update({label:'hcp03_03_02'},{$set: {weight:1.5}},{multi:true});
+    WriteResult({ "nMatched" : 4, "nUpserted" : 0, "nModified" : 4 })
+    > db.marks.update({label:'hcp03_03_03'},{$set: {label:'hcp03_03_01'}},{multi:true});
+    WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+    > db.marks.update({label:'hcp03_03_04'},{$set: {label:'hcp03_03_02'}},{multi:true});
+    WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+
+全て想定通り。admin.jsを確認したら課題のlabelやweightの変更は
+WebのGUIでも可能ではあったけど、ソース確認しないと自信が持て
+ないようじゃ、使えないなぁ。
+
