@@ -461,7 +461,7 @@ const init = async function(rg) {
     for (const s of students) {
       csv += `${s.account}`;
       for (const e of excercises) {
-        const m = await colMarks.findOne({course:e.course,lable:e.label,student:s.account});
+        const m = await colMarks.findOne({course:e.course,label:e.label,student:s.account});
         if (!!m) {
           csv += `,${m.mark}`;
         } else {
