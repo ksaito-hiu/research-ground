@@ -12,14 +12,14 @@ const init = async function(rg) {
   const initClient = async function() {
     try {
       const issuer = await Issuer.discover(rg.config.auth.issuer);
-      client = new issuer.Client({
-        client_id: rg.config.auth.client_id,
-        client_secret: rg.config.auth.client_secret,
+	  const metadata = {
         redirect_uris: rg.config.auth.redirect_uris,
-        response_types: ['code'],
-      });
+        post_logout_redirect_uris: [ rg.config.auth.post_logout_redirect_uri ]
+      }
+      client = await issuer.Client.register(metadata);
     } catch(err) {
       console.log(`Cannot search openid-op at ${rg.config.auth.issuer}. (tryCount=${tryCount})`);
+      console.log("GAHA: **************",err);
       tryCount++;
       let t = 1000*tryCount*tryCount;
       t = t>10*60*1000?10*60*1000:t;

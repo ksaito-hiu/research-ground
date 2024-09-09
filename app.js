@@ -34,7 +34,8 @@ const express = require('express');
     res.end("User-agent: *\nDisallow: /\n");
   });
 
-  app.use('/',research_ground);
+  //app.use('/',research_ground); // for apache2?
+  app.use('/research-ground',research_ground); // for nginx?
 
   app.listen(config.server.port,()=>{
     console.log(`research-ground started. port=${config.server.port}.`);
