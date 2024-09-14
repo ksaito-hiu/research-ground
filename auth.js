@@ -11,12 +11,26 @@ const init = async function(rg) {
   let client = null;
   const initClient = async function() {
     try {
+      /* 「OpenID Connect Dynamic Client Registration 1.0」を使うパターン
       const issuer = await Issuer.discover(rg.config.auth.issuer);
 	  const metadata = {
         redirect_uris: rg.config.auth.redirect_uris,
         post_logout_redirect_uris: [ rg.config.auth.post_logout_redirect_uri ]
       }
       client = await issuer.Client.register(metadata);
+      */
+      /* 「OpenID Connect Dynamic Client Registration 1.0」を使わないパターン */
+      const issuer = await Issuer.discover(rg.config.auth.issuer);
+	  const metadata = {
+        client_id: rg.config.auth.client_id,
+        client_secret: rg.config.auth.client_secret,
+        redirect_uris: rg.config.auth.redirect_uris,
+        response_types: [ 'code' ],
+        id_token_signed_response_alg: 'ES256',
+        post_logout_redirect_uris: [ rg.config.auth.post_logout_redirect_uri ]
+      }
+      client = await issuer.Client.register(metadata);
+      
     } catch(err) {
       console.log(`Cannot search openid-op at ${rg.config.auth.issuer}. (tryCount=${tryCount})`);
       console.log("GAHA: **************",err);
