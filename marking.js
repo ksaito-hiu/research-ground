@@ -259,13 +259,16 @@ const init = async function(rg) {
       res.render('error',o);
       return;
     }
+    // 採点日時の記録のため
+    const utime = new Date().getTime();
     o.excercise = await rg.colExcercises.findOne({course,label});
     let mark_data = await rg.colMarks.findOne({course:o.excercise.course,lable:o.excercise.label,student});
     if (!mark_data) {
-      mark_data = {course:o.excercise.course,label:o.excercise.label, student, status:'marked', mark, feedbacks:[feedback]};
+      mark_data = {course:o.excercise.course,label:o.excercise.label, student, status:'marked', mark, utime, feedbacks:[feedback]};
     } else {
       mark_data.status = 'marked';
       mark_data.mark = mark;
+      mark_date.utime = utime;
       mark_data.feedbacks.push(feedback); // 新しいfeedbackを最後に追加
     }
     const ret = await rg.colMarks.updateOne({course:o.excercise.course,label:o.excercise.label,student},{$set:mark_data},{upsert:true});
