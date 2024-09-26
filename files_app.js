@@ -189,7 +189,7 @@ const init = async function(rg) {
     if (!!req.session && !!req.session.webid)
       webid = req.session.webid;
     if (!webid) {
-      const loginURL = rg.config.server.mount_path+'auth/login?return_path='+rg.config.server.mount_path.slice(0,-1)+req.originalUrl;
+      const loginURL = rg.config.server.mount_path+'auth/login?return_path='+req.originalUrl;
       res.redirect(loginURL);
       return;
     }

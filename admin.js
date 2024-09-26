@@ -19,7 +19,7 @@ const init = async function(rg) {
       webid = req.session.webid;
     if (!webid) {
       const mount_path = rg.config.server.mount_path;
-      const loginURL = mount_path+'auth/login?return_path='+mount_path.slice(0,-1)+req.originalUrl;
+      const loginURL = mount_path+'auth/login?return_path='+req.originalUrl;
       res.redirect(loginURL);
       return;
     }
