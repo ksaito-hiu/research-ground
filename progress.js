@@ -129,8 +129,10 @@ const init = async function(rg) {
 
   router.get('/progress',loginCheck,async (req,res)=>{
     let uid = req.session.uid;
-    // 管理者のみ他のユーザーの情報が表示できる
+    // 管理者と担当教員のみ他のユーザーの情報が表示できる
     if (req.session.admin && req.query.uid) {
+      uid = req.query.uid;
+    } else if (req.session.teacher && req.query.uid) {
       uid = req.query.uid;
     }
     const o = {}; // ejsにわたすデーター

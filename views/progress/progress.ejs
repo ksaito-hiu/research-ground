@@ -88,7 +88,7 @@
             st = 'caution';
           else {
             if (m.status==='marked')
-              if (m.mark>=2)
+              if ((m.mark/e.point)>=0.8) // 満点の8割以上
                 st = 'safe';
               else
                 st = 'attention';
