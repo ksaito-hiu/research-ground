@@ -4,12 +4,12 @@ const express = require('express');
   const config = require('./config.json');
   // idをwebidに変換する関数を設定する
   config.identity.id2webid = function(id) {
-    return 'https://id.do-johodai.ac.jp/people/'+id+'#me';
+    return 'https://id.do-johodai.ac.jp/people/'+id;
   };
   // webidをidに変換する関数を設定する
   // もし、この関数がnullを返してきたならばログインを拒否する
   config.identity.webid2id = function(webid) {
-    const m = webid.match(/^https:\/\/id.do-johodai.ac.jp\/people\/([^#]+)#[^#]+$/);
+    const m = webid.match(/^https:\/\/id.do-johodai.ac.jp\/people\/(.+)$/);
     if (!m) return null;
     return m[1];
   };
