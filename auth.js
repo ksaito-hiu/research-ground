@@ -29,7 +29,8 @@ const init = async function(rg) {
         id_token_signed_response_alg: 'ES256',
         post_logout_redirect_uris: [ rg.config.auth.post_logout_redirect_uri ]
       }
-      client = await issuer.Client.register(metadata);
+      //client = await issuer.Client.register(metadata);
+      client = new issuer.Client(metadata);
       
     } catch(err) {
       console.log(`Cannot search openid-op at ${rg.config.auth.issuer}. (tryCount=${tryCount})`);
