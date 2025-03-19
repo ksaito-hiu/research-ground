@@ -30,6 +30,7 @@ const init = function(rg) {
               // 発展さていくような課題)を想定した対処
             } else {
               m.status = 'resubmitted';
+              m.utime = utime;
               await colMarks.updateOne({course:e.course,label:e.label,student:uid},{$set:m});
             }
           } else {
@@ -39,6 +40,7 @@ const init = function(rg) {
               student:uid,
               status:'submitted',
               mark:0,
+              utime,
               feedbacks:[]
             };
             await colMarks.insertOne(new_m);
@@ -53,6 +55,7 @@ const init = function(rg) {
           const m = await colMarks.findOne({course:e.course,label:e.label,student:uid});
           if (m) {
             m.status = 'removed';
+            m.utime = utime;
             await colMarks.updateOne({course:e.course,label:e.label,student:uid},{$set:m});
           } else {
             // 通常ありえない
