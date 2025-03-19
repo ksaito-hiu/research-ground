@@ -30,7 +30,7 @@ const init = async function(config_obj) {
   if (!config.identity.id2webid) {
     config.server.id2webid = function(id) {
       const hostname = config.auth.issuer.match(/^https:\/\/([^\/]+).*$/)[1];
-      return 'https://'+hostname+'/people/'+id+'#me';
+      return 'https://'+hostname+'/people/'+id;
     };
   }
   // WebIDをidに変換する関数が設定されてなければ以下の
