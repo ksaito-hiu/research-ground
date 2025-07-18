@@ -15,7 +15,7 @@
     "express-session": "^1.17.0",
     "i18n": "^0.10.0",
     "mongodb": "^3.6.10",
-    "multer": "^2.0.1",
+    "multer": "^2.0.2",
     "openid-client": "^5.6.5"
   }
 }
