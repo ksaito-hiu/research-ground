@@ -464,7 +464,7 @@ const init = async function(rg) {
     res.render('files/files.ejs',data);
   });
 
-  router.get('/*',loginCheck,
+  router.get('/*splat',loginCheck,
              permissionCheck,
              dirIndex,
              staticRouter);
@@ -472,7 +472,7 @@ const init = async function(rg) {
   // ファイルやディレクトリを作成，もしくはファイルの更新
   // パスの最後に'/'が着いてるかどうかで，ファイルかディレクトリか
   // を区別することにする。
-  router.put('/*',loginCheck,permissionCheck,uploadREST.single('file'),async (req,res)=>{
+  router.put('/*splat',loginCheck,permissionCheck,uploadREST.single('file'),async (req,res)=>{
     const webid = req.session.webid;
     const uid = req.session.uid;
     try {
@@ -501,7 +501,7 @@ const init = async function(rg) {
 
   // 単独のファイル，またはディレクトリの削除
   // ディレクトリは空でなければ消せない。
-  router.delete('/*',loginCheck,permissionCheck,async (req,res)=>{
+  router.delete('/*splat',loginCheck,permissionCheck,async (req,res)=>{
     const webid = req.session.webid;
     const uid = req.session.uid;
     try {

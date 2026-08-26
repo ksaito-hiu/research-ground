@@ -53,10 +53,7 @@ const init = async function(config_obj) {
 
   // MongoDBのクライアントを初期化しDBを取得し
   // 各種collectionを用意。DB名は'research_ground'の決め打ち
-  const mongo_client = new MongoClient('mongodb://127.0.0.1:27017',{
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  });
+  const mongo_client = new MongoClient(process.env.MONGODB_URI || config.mongodb?.uri || 'mongodb://127.0.0.1:27017');
   await mongo_client.connect();
   const db = mongo_client.db('research_ground');
   this.colActions = await db.collection('actions');

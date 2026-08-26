@@ -299,7 +299,7 @@ const init = async function(rg) {
     }
     const data = {course,label,feedback,count:1};
     const ret = await rg.colFeedbacks.insertOne(data);
-    if (ret.insertedCount===1) {
+    if (ret.acknowledged) {
       res.json({result:'ok',feedback_id:ret.insertedId,feedback});
       return;
     } else {
@@ -310,7 +310,7 @@ const init = async function(rg) {
   router.get('/feedback_del',loginCheck,async (req,res)=>{
     const uid = req.session.uid;
     const feedback_id = req.query.feedback_id;
-    const fid = new mongo.ObjectID(feedback_id);
+    const fid = new mongo.ObjectId(feedback_id);
     const f = await colFeedbacks.findOne({_id: fid});
     const e = await colExcercises.findOne({course:f.course,label:f.label});
     const course = e?e.course:'';

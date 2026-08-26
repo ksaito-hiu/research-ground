@@ -4,11 +4,16 @@
   "comment1": "以下はサーバー全体の設定",
   "server": {
     "port": "8080",
-    "mount_path": "/research-ground",
+    "mount_path": "/research-ground/",
     "session": {
       "secret": "some secret string",
       "maxAge": 10800000
     }
+  },
+
+  "comment1.4": "MongoDBへの接続設定",
+  "mongodb": {
+    "uri": "mongodb://127.0.0.1:27017"
   },
 
   "comment1.5": "WebIDなどに関する処理の設定",

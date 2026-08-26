@@ -10,13 +10,13 @@
   "license": "ISC",
   "dependencies": {
     "cookie-parser": "^1.4.7",
-    "ejs": "^3.1.10",
-    "express": "^4.22.2",
-    "express-session": "^1.18.2",
-    "i18n": "^0.10.0",
-    "mongodb": "^3.6.10",
+    "ejs": "^6.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "i18n": "^0.15.3",
+    "mongodb": "^6.21.0",
     "multer": "^2.2.0",
-    "openid-client": "^5.6.5"
+    "openid-client": "^6.8.7"
   },
   "overrides": {
     "brace-expansion": "^2.1.4"

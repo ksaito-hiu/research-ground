@@ -34,8 +34,10 @@ const express = require('express');
     res.end("User-agent: *\nDisallow: /\n");
   });
 
-  //app.use('/',research_ground); // for apache2?
-  app.use('/research-ground',research_ground); // for nginx?
+  // mount_pathの末尾の'/'を取り除いたものをマウント先のパスとして使う
+  // (mount_pathが'/'だけの場合はそのまま'/'にマウントする)
+  const mountPath = config.server.mount_path.replace(/\/+$/,'') || '/';
+  app.use(mountPath,research_ground);
 
   app.listen(config.server.port,()=>{
     console.log(`research-ground started. port=${config.server.port}.`);

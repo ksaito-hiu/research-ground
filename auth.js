@@ -1,5 +1,4 @@
 const express = require('express');
-const { Issuer, generators } = require('openid-client');
 
 const router = express.Router();
 
@@ -7,31 +6,20 @@ const init = async function(rg) {
   // 上記引数のrgはresearch-groundのインスタンス。rg.configで設定、
   // rg.colCoursesなどでMongoDBのcollectionにアクセスできる。
 
+  // openid-client v6はESM専用パッケージなのでdynamic importで読み込む
+  const oidc = await import('openid-client');
+
   let tryCount = 0;
-  let client = null;
+  let config = null; // openid-clientのConfigurationインスタンス
   const initClient = async function() {
     try {
-      /* 「OpenID Connect Dynamic Client Registration 1.0」を使うパターン
-      const issuer = await Issuer.discover(rg.config.auth.issuer);
-	  const metadata = {
-        redirect_uris: rg.config.auth.redirect_uris,
-        post_logout_redirect_uris: [ rg.config.auth.post_logout_redirect_uri ]
-      }
-      client = await issuer.Client.register(metadata);
-      */
-      /* 「OpenID Connect Dynamic Client Registration 1.0」を使わないパターン */
-      const issuer = await Issuer.discover(rg.config.auth.issuer);
-	  const metadata = {
-        client_id: rg.config.auth.client_id,
-        client_secret: rg.config.auth.client_secret,
-        redirect_uris: rg.config.auth.redirect_uris,
-        response_types: [ 'code' ],
+      const server = new URL(rg.config.auth.issuer);
+      const metadata = {
         id_token_signed_response_alg: 'ES256',
-        post_logout_redirect_uris: [ rg.config.auth.post_logout_redirect_uri ]
-      }
-      //client = await issuer.Client.register(metadata);
-      client = new issuer.Client(metadata);
-      
+      };
+      // 従来(openid-client v5)のデフォルト認証方式(client_secret_basic)を踏襲
+      const clientAuth = oidc.ClientSecretBasic(rg.config.auth.client_secret);
+      config = await oidc.discovery(server, rg.config.auth.client_id, metadata, clientAuth);
     } catch(err) {
       console.log(`Cannot search openid-op at ${rg.config.auth.issuer}. (tryCount=${tryCount})`);
       console.log("GAHA: **************",err);
@@ -43,27 +31,29 @@ const init = async function(rg) {
   }
   await initClient();
 
-  router.get('/login',(req,res)=>{
-    const code_verifier = generators.codeVerifier();
-    const code_challenge = generators.codeChallenge(code_verifier);
+  router.get('/login', async (req,res)=>{
+    const code_verifier = oidc.randomPKCECodeVerifier();
+    const code_challenge = await oidc.calculatePKCECodeChallenge(code_verifier);
     req.session.local_code_verifier = code_verifier;
     req.session.return_path = req.query.return_path;
 
     const params = {
+      redirect_uri: rg.config.auth.redirect_uris[0],
       scope: 'openid',
       code_challenge,
       code_challenge_method: 'S256'
     };
-    let goToUrl = client.authorizationUrl(params);
-    res.redirect(goToUrl);
+console.log('GAHA: config: ',config);
+    const goToUrl = oidc.buildAuthorizationUrl(config, params);
+    res.redirect(goToUrl.href);
   });
 
   router.get('/callback', async (req, res) => {
-    var params = client.callbackParams(req);
-    var code_verifier = req.session.local_code_verifier;
+    const currentUrl = new URL(req.originalUrl, `${req.protocol}://${req.get('host')}`);
+    const code_verifier = req.session.local_code_verifier;
     const baseUrl = rg.config.server.mount_path;
     try {
-      const tokenSet = await client.callback(rg.config.auth.redirect_uris[0], params, { code_verifier });
+      const tokenSet = await oidc.authorizationCodeGrant(config, currentUrl, { pkceCodeVerifier: code_verifier });
       req.session.id_tokenX = tokenSet.id_token;
       const webid = tokenSet.claims().sub;
       const uid = rg.config.identity.webid2id(webid);
@@ -141,8 +131,8 @@ const init = async function(rg) {
     res.clearCookie('admin');
     res.clearCookie('teacher');
     res.clearCookie('sa');
-    const theUrl = client.endSessionUrl(params);
-    res.redirect(theUrl);
+    const theUrl = oidc.buildEndSessionUrl(config, params);
+    res.redirect(theUrl.href);
   });
   router.get("/", (req, res) => {
     let msg;
