@@ -49,7 +49,15 @@ console.log('GAHA: config: ',config);
   });
 
   router.get('/callback', async (req, res) => {
-    const currentUrl = new URL(req.originalUrl, `${req.protocol}://${req.get('host')}`);
+    // redirect_uriは/loginで使ったのと同じ設定値(rg.config.auth.redirect_uris[0])を
+    // 基準にする。req.protocol/req.get('host')から組み立てると、リバースプロキシ
+    // 配下でtrust proxyが未設定の場合にスキーム(http/https)がずれ、
+    // authorizationCodeGrant()内部でredirect_uriとして送られる値
+    // (currentUrlのorigin+pathname、クエリ除く)が認可リクエスト時と食い違って
+    // 「authorization code redirect_uri mismatch」になる。
+    const currentUrl = new URL(rg.config.auth.redirect_uris[0]);
+    const queryIndex = req.originalUrl.indexOf('?');
+    currentUrl.search = queryIndex === -1 ? '' : req.originalUrl.slice(queryIndex);
     const code_verifier = req.session.local_code_verifier;
     const baseUrl = rg.config.server.mount_path;
     try {
