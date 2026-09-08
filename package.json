@@ -15,7 +15,7 @@
     "express-session": "^1.19.0",
     "i18n": "^0.15.3",
     "mongodb": "^6.21.0",
-    "multer": "^2.2.0",
+    "multer": "^2.3.0",
     "openid-client": "^6.8.7"
   },
   "overrides": {
